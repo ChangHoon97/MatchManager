@@ -1,0 +1,483 @@
+/* ========== 기본 초기화 ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', 'Noto Sans KR', sans-serif;
+    background: #f0f4f8;
+    color: #2d3748;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ========== 헤더 ========== */
+header {
+    text-align: center;
+    padding: 30px 0 20px;
+}
+
+header h1 {
+    font-size: 2rem;
+    color: #2b6cb0;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #718096;
+    font-size: 1rem;
+}
+
+/* ========== 급수 배지 ========== */
+.grade-badge {
+    display: inline-block;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #fff;
+    margin: 2px;
+}
+.grade-a { background: #e53e3e; }
+.grade-b { background: #dd6b20; }
+.grade-c { background: #d69e2e; }
+.grade-d { background: #38a169; }
+.grade-e { background: #3182ce; }
+.grade-f { background: #805ad5; }
+
+/* ========== 정보 박스 ========== */
+.info-box {
+    background: #ebf8ff;
+    border: 1px solid #bee3f8;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.info-box h3 { color: #2b6cb0; margin-bottom: 10px; font-size: 0.95rem; }
+
+.grade-legend { display: flex; gap: 6px; margin-bottom: 8px; }
+
+.grade-legend .grade-badge { width: 30px; height: 30px; line-height: 30px; font-size: 0.85rem; }
+
+.info-text { font-size: 0.85rem; color: #4a5568; }
+
+/* ========== 선수 입력 영역 ========== */
+.input-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+}
+
+.input-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.input-header h2 { font-size: 1.1rem; color: #2d3748; }
+
+.count-badge {
+    background: #2b6cb0;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+/* ========== 선수 행 ========== */
+.player-list { display: flex; flex-direction: column; gap: 8px; }
+
+.player-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: #f7fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: border-color 0.2s;
+}
+
+.player-row:hover { border-color: #90cdf4; }
+
+.player-num {
+    width: 28px;
+    height: 28px;
+    background: #2b6cb0;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.player-name-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.player-name-input:focus { border-color: #63b3ed; }
+
+.grade-select {
+    padding: 8px 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    outline: none;
+    cursor: pointer;
+    min-width: 60px;
+}
+
+.btn-remove {
+    width: 28px; height: 28px;
+    background: #fed7d7;
+    color: #c53030;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-remove:hover { background: #fc8181; color: #fff; }
+
+/* ========== 버튼 ========== */
+.btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.btn-add    { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+.btn-add:hover { background: #bee3f8; }
+
+.btn-sample { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+.btn-sample:hover { background: #9ae6b4; }
+
+.btn-clear  { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+.btn-clear:hover { background: #fed7d7; }
+
+.btn-generate {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.1rem;
+    background: #2b6cb0;
+    color: #fff;
+    border-radius: 10px;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+}
+.btn-generate:hover { background: #2c5282; transform: translateY(-1px); }
+
+.btn-print       { background: #2d3748; color: #fff; }
+.btn-print:hover { background: #1a202c; }
+
+.btn-regenerate       { background: #38a169; color: #fff; }
+.btn-regenerate:hover { background: #276749; }
+
+.btn-close  { background: #e2e8f0; color: #4a5568; }
+.btn-close:hover { background: #cbd5e0; }
+
+.btn-back   { background: #4a5568; color: #fff; }
+.btn-back:hover { background: #2d3748; }
+
+/* ========== 검증 메시지 ========== */
+.validation-msg {
+    padding: 12px 16px;
+    background: #fff5f5;
+    border: 1px solid #fc8181;
+    border-radius: 8px;
+    color: #c53030;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+.hidden { display: none !important; }
+
+/* ========== 결과 페이지 ========== */
+.court-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.court-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.court-header h2 { font-size: 1.3rem; color: #2b6cb0; }
+
+.player-count {
+    background: #e2e8f0;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #4a5568;
+}
+
+.court-players {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.player-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* ========== 게임 카드 ========== */
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.game-card {
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.game-title {
+    background: #2b6cb0;
+    color: #fff;
+    text-align: center;
+    padding: 8px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.match-area {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 8px;
+}
+
+.team {
+    flex: 1;
+    text-align: center;
+}
+
+.team-label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #718096;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.team-player {
+    padding: 6px 8px;
+    margin: 4px 0;
+    background: #f7fafc;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.team-a .team-player { border-left: 3px solid #3182ce; }
+.team-b .team-player { border-left: 3px solid #e53e3e; }
+
+.vs-badge {
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: #a0aec0;
+    flex-shrink: 0;
+}
+
+.waiting-area {
+    background: #fffbeb;
+    border-top: 1px dashed #f6e05e;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.waiting-label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #d69e2e;
+    background: #fefcbf;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.waiting-player {
+    font-size: 0.85rem;
+    color: #744210;
+}
+
+/* ========== 액션 버튼 ========== */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 24px;
+    padding-bottom: 40px;
+}
+
+/* ========== 모달 ========== */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 { font-size: 1.3rem; color: #2b6cb0; }
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: #718096;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-close:hover { background: #f7fafc; }
+
+.modal-body {
+    overflow-y: auto;
+    padding: 20px 24px;
+    flex: 1;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* ========== 인쇄 ========== */
+@media print {
+    /* 입력 영역 및 모달 외 UI 숨김 */
+    header, .info-box, .input-section, .btn-generate, .validation-msg,
+    .action-buttons, .btn-print, .btn-back,
+    .modal-footer, .modal-header { display: none !important; }
+
+    /* 배경/스타일 초기화 */
+    body { background: #fff; color: #000; }
+    .container { max-width: none; padding: 0; }
+
+    /* 모달을 일반 흐름으로 풀어서 전체 결과가 인쇄되도록 */
+    .modal {
+        position: static !important;
+        background: none !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+    .modal-content {
+        max-width: none;
+        max-height: none;
+        box-shadow: none;
+        border-radius: 0;
+    }
+    .modal-body {
+        overflow: visible !important;
+        max-height: none !important;
+        padding: 0;
+    }
+
+    /* 코트별 페이지 분할 */
+    .court-section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+    .game-card { break-inside: avoid; page-break-inside: avoid; }
+}
+
+/* ========== 반응형 ========== */
+@media (max-width: 600px) {
+    header h1 { font-size: 1.5rem; }
+    .match-area { flex-direction: column; }
+    .vs-badge { transform: rotate(90deg); }
+    .btn-group { flex-direction: column; }
+    .btn-group .btn { width: 100%; }
+}
