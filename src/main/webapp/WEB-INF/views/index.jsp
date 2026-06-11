@@ -19,7 +19,6 @@
         </div>
         <p class="subtitle">참가자 성함과 급수를 입력하고 대진표를 생성하세요</p>
     </header>
-ㄴ
     <main>
         <section class="info-box">
             <h3>📋 급수 안내</h3>
