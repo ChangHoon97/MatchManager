@@ -306,13 +306,13 @@ function renderGameCard(game, ci, gi) {
         </div>
         <div class="match-area">
             <div class="team team-a">
-                <div class="team-label">A팀 <span class="team-score">${tA}</span></div>
+                <div class="team-label">A팀</div>
                 ${renderSlot(game.teamA1, ci, gi, 'teamA1', 'team-a')}
                 ${renderSlot(game.teamA2, ci, gi, 'teamA2', 'team-a')}
             </div>
             <div class="vs-badge">VS</div>
             <div class="team team-b">
-                <div class="team-label">B팀 <span class="team-score">${tB}</span></div>
+                <div class="team-label">B팀</div>
                 ${renderSlot(game.teamB1, ci, gi, 'teamB1', 'team-b')}
                 ${renderSlot(game.teamB2, ci, gi, 'teamB2', 'team-b')}
             </div>
