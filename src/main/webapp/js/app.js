@@ -198,6 +198,24 @@ function hideExcelMsg() {
     }
 }
 
+// ========== 코트 수 ==========
+
+let courtCount = 0; // 0 = 자동
+
+function changeCourtCount(delta) {
+    courtCount = Math.max(0, courtCount + delta);
+    document.getElementById('courtCountDisplay').textContent =
+        courtCount === 0 ? '자동' : courtCount;
+}
+
+let gamesPerPlayer = 0; // 0 = 자동
+
+function changeGameCount(delta) {
+    gamesPerPlayer = Math.max(0, gamesPerPlayer + delta);
+    document.getElementById('gameCountDisplay').textContent =
+        gamesPerPlayer === 0 ? '자동' : gamesPerPlayer;
+}
+
 // ========== 대진표 생성 ==========
 
 function generateDraw() {
@@ -206,8 +224,9 @@ function generateDraw() {
         showValidation('최소 4명 이상 입력해주세요.');
         return;
     }
-    if (validPlayers.length < 6) {
-        showValidation('코트당 최소 6명 필요합니다. 선수를 더 추가해주세요.');
+    if (courtCount > 0 && Math.floor(validPlayers.length / courtCount) < 4) {
+        const maxCourts = Math.floor(validPlayers.length / 4);
+        showValidation(`코트당 최소 4명이 필요합니다. ${validPlayers.length}명으로는 최대 ${maxCourts}개 코트 설정 가능합니다.`);
         return;
     }
     hideValidation();
@@ -215,7 +234,7 @@ function generateDraw() {
     fetch('/api/draw', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ players: validPlayers })
+        body: JSON.stringify({ players: validPlayers, courtCount, gamesPerPlayer })
     })
     .then(async res => {
         const data = await res.json();
@@ -257,7 +276,6 @@ function renderModalContent() {
                     <span class="player-chip">
                         ${escapeHtml(p.name)}
                         <span class="grade-badge grade-${escapeHtml(p.grade.toLowerCase())}">${escapeHtml(p.grade)}</span>
-                        <span class="score-tag">${totalScore(p)}</span>
                     </span>
                 `).join('')}
             </div>
@@ -314,7 +332,6 @@ function renderSlot(player, ci, gi, role, teamClass) {
                      ondrop="dndDrop(event)">
             ${escapeHtml(player.name)}
             <span class="grade-badge grade-${escapeHtml(player.grade.toLowerCase())}">${escapeHtml(player.grade)}</span>
-            <span class="score-tag">${totalScore(player)}</span>
         </div>`;
     }
     return `<div class="team-player ${teamClass} dnd-empty"

@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MatchManager — 배드민턴 대진표 생성기</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
@@ -63,6 +65,21 @@
         </section>
 
         <div id="validationMsg" class="validation-msg hidden"></div>
+
+        <div class="court-setting">
+            <span class="court-label">코트 수</span>
+            <div class="court-stepper">
+                <button type="button" class="stepper-btn" onclick="changeCourtCount(-1)">−</button>
+                <span id="courtCountDisplay" class="stepper-val">자동</span>
+                <button type="button" class="stepper-btn" onclick="changeCourtCount(+1)">+</button>
+            </div>
+            <span class="court-label">인당 게임 수</span>
+            <div class="court-stepper">
+                <button type="button" class="stepper-btn" onclick="changeGameCount(-1)">−</button>
+                <span id="gameCountDisplay" class="stepper-val">자동</span>
+                <button type="button" class="stepper-btn" onclick="changeGameCount(+1)">+</button>
+            </div>
+        </div>
 
         <button type="button" class="btn btn-generate" onclick="generateDraw()">
             대진표 생성하기

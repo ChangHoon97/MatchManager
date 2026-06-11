@@ -16,18 +16,29 @@ public class DrawService {
      * 2. 코트별로 배분 (비슷한 실력끼리)
      * 3. 각 코트에서 게임 대진표 생성
      */
-    public List<Court> generateDraw(List<Player> players) {
-        // 강한 순(totalScore 내림차순) 정렬 후 뱀 배분 → 코트별 균형
+    public List<Court> generateDraw(List<Player> players, int requestedCourtCount, int gamesPerPlayer) {
         players.sort(Comparator.comparingInt(Player::getTotalScore).reversed());
 
-        int courtCount = calculateCourtCount(players.size());
+        int courtCount;
+        if (requestedCourtCount > 0) {
+            int minPerCourt = players.size() / requestedCourtCount;
+            if (minPerCourt < 4) {
+                int maxCourts = players.size() / 4;
+                throw new IllegalArgumentException(
+                    "코트당 최소 4명이 필요합니다. " +
+                    players.size() + "명으로는 최대 " + maxCourts + "개 코트 설정 가능합니다.");
+            }
+            courtCount = requestedCourtCount;
+        } else {
+            courtCount = calculateCourtCount(players.size());
+        }
 
         List<List<Player>> courtPlayers = assignPlayersToCourts(players, courtCount);
 
         List<Court> courts = new ArrayList<>();
         for (int i = 0; i < courtCount; i++) {
             Court court = new Court(i + 1, courtPlayers.get(i));
-            List<Game> games = generateGamesForCourt(courtPlayers.get(i));
+            List<Game> games = generateGamesForCourt(courtPlayers.get(i), gamesPerPlayer);
             court.setGames(games);
             courts.add(court);
         }
@@ -92,9 +103,11 @@ public class DrawService {
      *
      * 원칙: 같은 파트너 최대한 안 겹치게
      */
-    private List<Game> generateGamesForCourt(List<Player> players) {
+    private List<Game> generateGamesForCourt(List<Player> players, int gamesPerPlayer) {
         int size = players.size();
-        int gameCount = (size <= 6) ? 2 : 3;
+        int gameCount = (gamesPerPlayer > 0)
+            ? (int) Math.ceil((double) size * gamesPerPlayer / 4)
+            : (size <= 6 ? 2 : 3);
 
         Map<String, Integer> partnerCount = new HashMap<>();
 

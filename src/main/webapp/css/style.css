@@ -31,8 +31,9 @@
     --clr-text:        #1E7272;
     --clr-placeholder: rgba(30, 114, 114, 0.35);
 
-    --font-body:  'YoonMinGuk', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-    --font-title: 'CariCadou', 'YoonMinGuk', cursive;
+    --font-body:  'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    --font-yoon:  'YoonMinGuk', 'Pretendard', sans-serif;
+    --font-title: 'CariCadou', 'Pretendard', cursive;
 
     --radius-pill: 999px;
     --radius-card: 18px;
@@ -96,7 +97,7 @@ header h1 {
 }
 
 .subtitle {
-    font-family: var(--font-body);
+    font-family: var(--font-yoon);
     font-size: 17px;
     color: var(--clr-text);
     letter-spacing: 0.02em;
@@ -298,7 +299,7 @@ header h1 {
     background: none;
     border: none;
     color: var(--clr-teal);
-    font-family: var(--font-body);
+    font-family: var(--font-yoon);
     font-size: 15px;
     padding: 10px 22px;
     border-radius: var(--radius-sm);
@@ -392,6 +393,57 @@ header h1 {
 }
 
 .validation-msg.hidden { display: none; }
+
+/* ===== 코트 수 스테퍼 ===== */
+.court-setting {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.court-label {
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--clr-teal);
+}
+
+.court-stepper {
+    display: flex;
+    align-items: center;
+    background: var(--clr-white);
+    border: 2px solid var(--clr-teal);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.stepper-btn {
+    width: 46px;
+    height: 46px;
+    border: none;
+    background: transparent;
+    color: var(--clr-teal);
+    font-size: 24px;
+    line-height: 1;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.stepper-btn:hover {
+    background: rgba(30, 114, 114, 0.10);
+}
+
+.stepper-val {
+    min-width: 64px;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 17px;
+    font-weight: bold;
+    color: var(--clr-teal);
+    padding: 0 4px;
+    user-select: none;
+}
 
 /* ===== 대진표 생성 버튼 ===== */
 .btn-generate {

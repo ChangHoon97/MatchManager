@@ -19,6 +19,12 @@ public class DrawRequestDto {
     @Valid
     private List<PlayerDto> players;
 
+    @Min(value = 0, message = "코트 수는 0 이상이어야 합니다.")
+    private int courtCount = 0; // 0 = 자동 계산
+
+    @Min(value = 0, message = "인당 게임 수는 0 이상이어야 합니다.")
+    private int gamesPerPlayer = 0; // 0 = 자동 계산
+
     @Data
     public static class PlayerDto {
         @NotBlank(message = "이름을 입력해주세요.")

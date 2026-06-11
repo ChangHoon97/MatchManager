@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class DrawController {
@@ -40,7 +41,13 @@ public class DrawController {
         for (DrawRequestDto.PlayerDto dto : request.getPlayers()) {
             players.add(new Player(dto.getName(), dto.getGrade(), dto.getValue()));
         }
-        return drawService.generateDraw(players);
+        return drawService.generateDraw(players, request.getCourtCount(), request.getGamesPerPlayer());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> handleIllegalArg(IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
     }
 
     @GetMapping("/api/excel-template")

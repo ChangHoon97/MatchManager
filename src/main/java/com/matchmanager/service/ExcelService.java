@@ -179,7 +179,13 @@ public class ExcelService {
     private String cellString(Row row, int col) {
         Cell cell = row.getCell(col);
         if (cell == null) return "";
-        return switch (cell.getCellType()) {
+
+        // FORMULA 타입은 캐시된 결과 타입으로 재평가
+        CellType type = cell.getCellType() == CellType.FORMULA
+                ? cell.getCachedFormulaResultType()
+                : cell.getCellType();
+
+        return switch (type) {
             case STRING  -> cell.getStringCellValue().trim();
             case NUMERIC -> {
                 double v = cell.getNumericCellValue();
