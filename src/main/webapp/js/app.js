@@ -76,7 +76,7 @@ function renderPlayerRow(index) {
                class="value-input"
                min="0" max="100"
                value="${p.value}"
-               oninput="updatePlayer(${index}, 'value', Math.min(100, Math.max(0, +this.value || 0)))">
+               oninput="this.value = Math.min(100, Math.max(0, +this.value || 0)); updatePlayer(${index}, 'value', +this.value)">
         <button class="btn-remove" onclick="removePlayer(${index})" title="삭제">✕</button>
     `;
     list.appendChild(row);

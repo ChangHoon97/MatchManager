@@ -53,7 +53,6 @@
                 <button type="button" class="btn btn-add"    onclick="addPlayer()">+선수추가</button>
                 <button type="button" class="btn btn-clear"  onclick="clearAll()">전체 초기화</button>
                 <button type="button" class="btn btn-sample" onclick="loadSample()">샘플데이터 불러오기</button>
-                <button type="button" class="btn btn-print-main" onclick="window.print()">인쇄</button>
             </div>
 
             <div class="excel-section">
