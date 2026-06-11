@@ -1,6 +1,8 @@
 package com.matchmanager.dto;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -26,5 +28,9 @@ public class DrawRequestDto {
         @NotBlank(message = "급수를 선택해주세요.")
         @Pattern(regexp = "[A-Fa-f]", message = "급수는 A~F 중 하나여야 합니다.")
         private String grade;
+
+        @Min(value = 0, message = "수치는 0 이상이어야 합니다.")
+        @Max(value = 100, message = "수치는 100 이하여야 합니다.")
+        private int value = 50;
     }
 }

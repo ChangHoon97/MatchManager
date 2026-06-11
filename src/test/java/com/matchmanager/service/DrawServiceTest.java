@@ -184,16 +184,25 @@ class DrawServiceTest {
     }
 
     @Nested
-    @DisplayName("Player.getGradeValue")
+    @DisplayName("Player.getGradeValue / getTotalScore")
     class GradeValue {
 
         @Test
-        @DisplayName("A는 1, F는 6, 알려지지 않은 등급은 99")
+        @DisplayName("A=6(강), F=1(약), 알 수 없는 등급은 0")
         void gradeMapping() {
-            assertThat(new Player("x", "A").getGradeValue()).isEqualTo(1);
-            assertThat(new Player("x", "F").getGradeValue()).isEqualTo(6);
-            assertThat(new Player("x", "a").getGradeValue()).isEqualTo(1);
-            assertThat(new Player("x", "Z").getGradeValue()).isEqualTo(99);
+            assertThat(new Player("x", "A").getGradeValue()).isEqualTo(6);
+            assertThat(new Player("x", "F").getGradeValue()).isEqualTo(1);
+            assertThat(new Player("x", "a").getGradeValue()).isEqualTo(6);
+            assertThat(new Player("x", "Z").getGradeValue()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("totalScore: A+100=600(최강), F+0=0(최약), 경계값 A+0=B+100=500")
+        void totalScoreMapping() {
+            assertThat(new Player("x", "A", 100).getTotalScore()).isEqualTo(600);
+            assertThat(new Player("x", "F", 0).getTotalScore()).isEqualTo(0);
+            assertThat(new Player("x", "A", 0).getTotalScore()).isEqualTo(500);
+            assertThat(new Player("x", "B", 100).getTotalScore()).isEqualTo(500);
         }
     }
 }

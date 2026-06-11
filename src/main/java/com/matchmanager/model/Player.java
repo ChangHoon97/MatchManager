@@ -10,17 +10,30 @@ import lombok.NoArgsConstructor;
 public class Player {
 
     private String name;
-    private String grade; // A, B, C, D, E, F
+    private String grade; // A~F
+    private int value;    // 0~100 (높을수록 해당 급수 내 강함)
 
+    public Player(String name, String grade) {
+        this.name = name;
+        this.grade = grade;
+        this.value = 50;
+    }
+
+    /** A=6, B=5 ... F=1 — 클수록 강함 */
     public int getGradeValue() {
         return switch (grade.toUpperCase()) {
-            case "A" -> 1;
-            case "B" -> 2;
-            case "C" -> 3;
-            case "D" -> 4;
-            case "E" -> 5;
-            case "F" -> 6;
-            default  -> 99;
+            case "A" -> 6;
+            case "B" -> 5;
+            case "C" -> 4;
+            case "D" -> 3;
+            case "E" -> 2;
+            case "F" -> 1;
+            default  -> 0;
         };
+    }
+
+    /** 0~600 범위. 높을수록 강함. A+100=600, F+0=0 */
+    public int getTotalScore() {
+        return (getGradeValue() - 1) * 100 + value;
     }
 }

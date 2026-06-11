@@ -17,7 +17,8 @@ public class DrawService {
      * 3. 각 코트에서 게임 대진표 생성
      */
     public List<Court> generateDraw(List<Player> players) {
-        players.sort(Comparator.comparingInt(Player::getGradeValue));
+        // 강한 순(totalScore 내림차순) 정렬 후 뱀 배분 → 코트별 균형
+        players.sort(Comparator.comparingInt(Player::getTotalScore).reversed());
 
         int courtCount = calculateCourtCount(players.size());
 
@@ -161,8 +162,9 @@ public class DrawService {
     }
 
     /**
-     * 4명 중 파트너 겹침이 가장 적은 팀 분할 선택
-     * 3가지 경우의 수: (0,1 vs 2,3), (0,2 vs 1,3), (0,3 vs 1,2)
+     * 3가지 팀 분할 중 최적 선택
+     * 우선순위 1: 파트너 반복 최소화
+     * 우선순위 2: 양 팀 합산 점수 차 최소화 (±100 이내 목표)
      */
     private int[] findBestSplit(List<Player> players, List<Integer> indices,
                                  Map<String, Integer> partnerCount) {
@@ -179,8 +181,13 @@ public class DrawService {
         int[] bestSplit = splits[0];
 
         for (int[] split : splits) {
-            int score = getPartnerScore(players, split[0], split[1], partnerCount)
-                      + getPartnerScore(players, split[2], split[3], partnerCount);
+            int partnerScore = getPartnerScore(players, split[0], split[1], partnerCount)
+                             + getPartnerScore(players, split[2], split[3], partnerCount);
+            int teamA = players.get(split[0]).getTotalScore() + players.get(split[1]).getTotalScore();
+            int teamB = players.get(split[2]).getTotalScore() + players.get(split[3]).getTotalScore();
+            int balanceScore = Math.abs(teamA - teamB);
+            // 파트너 반복 1회 = 점수차 500에 해당하는 패널티
+            int score = partnerScore * 500 + balanceScore;
             if (score < bestScore) {
                 bestScore = score;
                 bestSplit = split;

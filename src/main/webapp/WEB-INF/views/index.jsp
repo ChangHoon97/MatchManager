@@ -4,14 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏸 MatchManager — 배드민턴 대진표 생성기</title>
+    <title>MatchManager — 배드민턴 대진표 생성기</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
 <div class="container">
     <header>
-        <h1>🏸 MatchManager</h1>
-        <p class="subtitle">참가자 이름과 급수를 입력하고 대진표를 생성하세요</p>
+        <div class="header-inner">
+            <h1>MATCH MANAGER</h1>
+            <img src="${pageContext.request.contextPath}/img/icon.png"
+                 alt="MatchManager 로고" class="header-icon">
+        </div>
+        <p class="subtitle">참가자 성함과 급수를 입력하고 대진표를 생성하세요</p>
     </header>
 
     <main>
@@ -25,7 +29,7 @@
                 <span class="grade-badge grade-e">E</span>
                 <span class="grade-badge grade-f">F</span>
             </div>
-            <p class="info-text">A가 가장 강함 · 코트당 6~8명 · 복식(2v2) · 비슷한 실력끼리 배정</p>
+            <p class="info-text">A가 가장 강함 · 수치 0~100 (높을수록 해당 급수 내 강함) · ±100 이내 균형 매칭 · 결과 카드에서 드래그앤드롭으로 수동 조정 가능</p>
         </section>
 
         <section class="input-section">
@@ -39,16 +43,29 @@
             </div>
 
             <div class="btn-group">
-                <button type="button" class="btn btn-add" onclick="addPlayer()">+ 선수 추가</button>
-                <button type="button" class="btn btn-sample" onclick="loadSample()">샘플 데이터 불러오기</button>
-                <button type="button" class="btn btn-clear" onclick="clearAll()">전체 초기화</button>
+                <button type="button" class="btn btn-add"    onclick="addPlayer()">+선수추가</button>
+                <button type="button" class="btn btn-clear"  onclick="clearAll()">전체 초기화</button>
+                <button type="button" class="btn btn-sample" onclick="loadSample()">샘플데이터 불러오기</button>
+                <button type="button" class="btn btn-print-main" onclick="window.print()">인쇄</button>
             </div>
+
+            <div class="excel-section">
+                <span class="excel-label">엑셀 일괄 입력</span>
+                <a href="${pageContext.request.contextPath}/api/excel-template"
+                   class="btn btn-excel-dl" download>📥 양식 다운로드</a>
+                <label class="btn btn-excel-ul">
+                    📂 엑셀 업로드
+                    <input type="file" id="excelFileInput" accept=".xlsx,.xls"
+                           style="display:none" onchange="uploadExcel(this)">
+                </label>
+            </div>
+            <div id="excelMsg" class="excel-msg hidden"></div>
         </section>
 
         <div id="validationMsg" class="validation-msg hidden"></div>
 
         <button type="button" class="btn btn-generate" onclick="generateDraw()">
-            🎯 대진표 생성하기
+            대진표 생성하기
         </button>
     </main>
 </div>
@@ -64,9 +81,9 @@
             <!-- 결과가 여기에 출력됨 -->
         </div>
         <div class="modal-footer">
-            <button class="btn btn-print" onclick="window.print()">🖨️ 인쇄</button>
+            <button class="btn btn-print"      onclick="window.print()">🖨️ 인쇄</button>
             <button class="btn btn-regenerate" onclick="regenerate()">🔄 다시 생성</button>
-            <button class="btn btn-close" onclick="closeModal()">닫기</button>
+            <button class="btn btn-close"      onclick="closeModal()">닫기</button>
         </div>
     </div>
 </div>
