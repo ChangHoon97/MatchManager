@@ -836,6 +836,10 @@ header h1 {
 
 /* ===== 인쇄 ===== */
 @media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
     body { background: white; background-image: none; }
     .container { display: none; }
     .modal {
