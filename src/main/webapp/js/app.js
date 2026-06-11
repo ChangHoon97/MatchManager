@@ -103,7 +103,7 @@ function handleEnter(event, index) {
 function clearAll() {
     if (players.length > 0 && !confirm('전체 초기화할까요?')) return;
     players = [];
-    renderAll();
+    for (let i = 0; i < 4; i++) addPlayer();
 }
 
 // ========== 샘플 데이터 ==========
