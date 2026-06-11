@@ -11,7 +11,7 @@ function escapeHtml(str) {
 }
 
 function gradeNum(grade) {
-    return { A:6, B:5, C:4, D:3, E:2, F:1 }[grade?.toUpperCase()] || 0;
+    return { S:7, A:6, B:5, C:4, D:3, E:2, F:1 }[grade?.toUpperCase()] || 0;
 }
 
 function totalScore(player) {
@@ -55,7 +55,7 @@ function renderPlayerRow(index) {
     row.className = 'player-row';
     row.id = `row-${index}`;
 
-    const grades = ['A','B','C','D','E','F'];
+    const grades = ['S','A','B','C','D','E','F'];
     const gradeOptions = grades.map(g =>
         `<option value="${g}" ${p.grade === g ? 'selected' : ''}>${g}</option>`
     ).join('');

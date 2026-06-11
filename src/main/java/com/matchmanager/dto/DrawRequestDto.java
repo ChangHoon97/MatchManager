@@ -32,7 +32,7 @@ public class DrawRequestDto {
         private String name;
 
         @NotBlank(message = "급수를 선택해주세요.")
-        @Pattern(regexp = "[A-Fa-f]", message = "급수는 A~F 중 하나여야 합니다.")
+        @Pattern(regexp = "[SsA-Fa-f]", message = "급수는 S~F 중 하나여야 합니다.")
         private String grade;
 
         @Min(value = 0, message = "수치는 0 이상이어야 합니다.")

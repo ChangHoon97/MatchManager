@@ -19,11 +19,12 @@
         </div>
         <p class="subtitle">참가자 성함과 급수를 입력하고 대진표를 생성하세요</p>
     </header>
-
+ㄴ
     <main>
         <section class="info-box">
             <h3>📋 급수 안내</h3>
             <div class="grade-legend">
+                <span class="grade-badge grade-s">S</span>
                 <span class="grade-badge grade-a">A</span>
                 <span class="grade-badge grade-b">B</span>
                 <span class="grade-badge grade-c">C</span>
@@ -31,7 +32,11 @@
                 <span class="grade-badge grade-e">E</span>
                 <span class="grade-badge grade-f">F</span>
             </div>
-            <p class="info-text">A가 가장 강함 · 수치 0~100 (높을수록 해당 급수 내 강함) · ±100 이내 균형 매칭 · 결과 카드에서 드래그앤드롭으로 수동 조정 가능</p>
+            <p class="info-text">
+                S~F 등급까지 존재합니다.<br/>
+                같은 등급 내의 실력 차이는 등급 옆 수치로 입력해주세요.(0~100까지만 입력가능)<br/>
+                대진표에서 드래그앤드롭으로 수동 조정 가능합니다
+            </p>
         </section>
 
         <section class="input-section">
@@ -86,6 +91,17 @@
         </button>
     </main>
 </div>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">MATCH MANAGER</div>
+        <div class="footer-divider"></div>
+        <div class="footer-info">
+            <span class="footer-item"><span class="footer-label">Developer</span> 이창훈</span>
+            <span class="footer-item"><span class="footer-label">Contact</span> hyo040441@gmail.com</span>
+        </div>
+    </div>
+</footer>
 
 <!-- 결과 모달 -->
 <div id="resultModal" class="modal hidden">

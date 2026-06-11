@@ -55,7 +55,7 @@ public class DrawService {
      * 예) D(4)+E(14)+F(8), sizes=[7,7,6,6] → [D4+E3:7, E7:7, E4+F2:6, F6:6]
      */
     private List<List<Player>> fillCourtsWithSizes(List<Player> sortedPlayers, List<Integer> sizes) {
-        String[] gradeOrder = {"A", "B", "C", "D", "E", "F"};
+        String[] gradeOrder = {"S", "A", "B", "C", "D", "E", "F"};
         Map<String, List<Player>> byGrade = new LinkedHashMap<>();
         for (String g : gradeOrder) byGrade.put(g, new ArrayList<>());
         for (Player p : sortedPlayers) byGrade.get(p.getGrade().toUpperCase()).add(p);
@@ -87,7 +87,7 @@ public class DrawService {
      * 급수 순서(A→F)대로 carry 버퍼에 쌓고, target명이 모이면 코트 확정 (자동 코트 수 모드).
      */
     private List<List<Player>> fillCourtsFromGrades(List<Player> sortedPlayers, int target) {
-        String[] gradeOrder = {"A", "B", "C", "D", "E", "F"};
+        String[] gradeOrder = {"S", "A", "B", "C", "D", "E", "F"};
         Map<String, List<Player>> byGrade = new LinkedHashMap<>();
         for (String g : gradeOrder) byGrade.put(g, new ArrayList<>());
         for (Player p : sortedPlayers) byGrade.get(p.getGrade().toUpperCase()).add(p);

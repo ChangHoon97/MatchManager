@@ -22,6 +22,7 @@ public class Player {
     /** A=6, B=5 ... F=1 — 클수록 강함 */
     public int getGradeValue() {
         return switch (grade.toUpperCase()) {
+            case "S" -> 7;
             case "A" -> 6;
             case "B" -> 5;
             case "C" -> 4;

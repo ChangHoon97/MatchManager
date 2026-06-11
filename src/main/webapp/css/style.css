@@ -58,6 +58,8 @@ body {
     background-size: 28px 28px;
     min-height: 100vh;
     color: var(--clr-text);
+    display: flex;
+    flex-direction: column;
 }
 
 /* ===== CONTAINER ===== */
@@ -487,6 +489,7 @@ header h1 {
     flex-shrink: 0;
 }
 
+.grade-s { background: #7B2FA6; }
 .grade-a { background: #1E7272; }
 .grade-b { background: #28886A; }
 .grade-c { background: #439652; }
@@ -834,6 +837,67 @@ header h1 {
     .games-grid   { grid-template-columns: 1fr; }
 }
 
+/* ===== 푸터 ===== */
+.site-footer {
+    margin-top: auto;
+    padding: 28px 24px;
+    background: #175e5e;
+    border-top: 2px solid rgba(0,0,0,0.12);
+}
+
+.footer-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.footer-brand {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap;
+}
+
+.footer-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.15);
+    flex-shrink: 0;
+}
+
+.footer-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+}
+
+.footer-item {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.footer-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.07);
+    padding: 2px 7px;
+    border-radius: 4px;
+}
+
+@media (max-width: 480px) {
+    .footer-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .footer-divider { display: none; }
+}
+
 /* ===== 인쇄 ===== */
 @media print {
     * {
@@ -857,4 +921,5 @@ header h1 {
     }
     .modal-header { border-bottom: 2px solid #ccc; }
     .modal-footer { display: none; }
+    .site-footer   { display: none; }
 }
