@@ -292,15 +292,16 @@ function renderGameCard(game, ci, gi) {
     const tA = totalScore(game.teamA1) + totalScore(game.teamA2);
     const tB = totalScore(game.teamB1) + totalScore(game.teamB2);
     const diff = Math.abs(tA - tB);
-    const balanced = diff <= 100;
+    const balanced = diff < 70;
+    const label = balanced ? '균형' : (tA > tB ? 'A팀 우세' : 'B팀 우세');
+    const cls   = balanced ? 'balance-ok' : 'balance-warn';
 
     return `
     <div class="game-card">
         <div class="game-title">
             Game ${game.gameNumber}
-            <span class="balance-badge ${balanced ? 'balance-ok' : 'balance-warn'}"
-                  title="팀 점수차: ${diff}">
-                ${balanced ? '✓ 균형' : `△ ${diff}차`}
+            <span class="balance-badge ${cls}" title="팀 점수차: ${diff}">
+                ${label}
             </span>
         </div>
         <div class="match-area">

@@ -6,102 +6,113 @@ import com.matchmanager.model.Player;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DrawService {
 
-    /**
-     * 전체 대진표 생성 메인 메서드
-     * 1. 급수 기준으로 정렬
-     * 2. 코트별로 배분 (비슷한 실력끼리)
-     * 3. 각 코트에서 게임 대진표 생성
-     */
     public List<Court> generateDraw(List<Player> players, int requestedCourtCount, int gamesPerPlayer) {
         players.sort(Comparator.comparingInt(Player::getTotalScore).reversed());
 
-        int courtCount;
-        if (requestedCourtCount > 0) {
-            int minPerCourt = players.size() / requestedCourtCount;
-            if (minPerCourt < 4) {
-                int maxCourts = players.size() / 4;
-                throw new IllegalArgumentException(
-                    "코트당 최소 4명이 필요합니다. " +
-                    players.size() + "명으로는 최대 " + maxCourts + "개 코트 설정 가능합니다.");
-            }
-            courtCount = requestedCourtCount;
-        } else {
-            courtCount = calculateCourtCount(players.size());
+        if (requestedCourtCount > 0 && players.size() / requestedCourtCount < 4) {
+            int maxCourts = players.size() / 4;
+            throw new IllegalArgumentException(
+                "코트당 최소 4명이 필요합니다. " +
+                players.size() + "명으로는 최대 " + maxCourts + "개 코트 설정 가능합니다.");
         }
 
-        List<List<Player>> courtPlayers = assignPlayersToCourts(players, courtCount);
+        List<List<Player>> courtPlayers = assignPlayersToCourts(players, requestedCourtCount);
 
         List<Court> courts = new ArrayList<>();
-        for (int i = 0; i < courtCount; i++) {
+        for (int i = 0; i < courtPlayers.size(); i++) {
             Court court = new Court(i + 1, courtPlayers.get(i));
             List<Game> games = generateGamesForCourt(courtPlayers.get(i), gamesPerPlayer);
             court.setGames(games);
             courts.add(court);
         }
+        return courts;
+    }
 
+    private List<List<Player>> assignPlayersToCourts(List<Player> sortedPlayers, int requestedCourtCount) {
+        int total = sortedPlayers.size();
+        int estimatedCourts = (requestedCourtCount > 0)
+            ? requestedCourtCount
+            : Math.max(1, (int) Math.ceil((double) total / 7.0));
+        int target = (int) Math.max(4, Math.round((double) total / estimatedCourts));
+
+        List<List<Player>> courts = fillCourtsFromGrades(sortedPlayers, target);
+
+        if (requestedCourtCount > 0) {
+            courts = adjustCourtCount(courts, requestedCourtCount);
+        }
         return courts;
     }
 
     /**
-     * 코트 수 계산
-     * 코트당 최소 6명, 최대 8명 기준
+     * 급수 순서(A→F)대로 carry 버퍼에 쌓고, target명이 모이면 코트 확정.
+     * D(4)처럼 target보다 적은 급수는 다음 급수 상위 선수들로 보충됨.
+     * 예) D(4)+E(14)+F(8), target=7 → [D4+E3:7, E7:7, E4+F3:7, F5:5]
      */
-    private int calculateCourtCount(int totalPlayers) {
-        for (int courts = 1; courts <= 10; courts++) {
-            int perCourt = totalPlayers / courts;
-            int remainder = totalPlayers % courts;
-            if (perCourt >= 6 && perCourt <= 8 && (remainder == 0 || perCourt + 1 <= 8)) {
-                return courts;
-            }
-        }
-        return (int) Math.ceil(totalPlayers / 7.0);
-    }
+    private List<List<Player>> fillCourtsFromGrades(List<Player> sortedPlayers, int target) {
+        String[] gradeOrder = {"A", "B", "C", "D", "E", "F"};
+        Map<String, List<Player>> byGrade = new LinkedHashMap<>();
+        for (String g : gradeOrder) byGrade.put(g, new ArrayList<>());
+        for (Player p : sortedPlayers) byGrade.get(p.getGrade().toUpperCase()).add(p);
 
-    /**
-     * 급수 기반으로 코트에 선수 배분
-     * 강한 순으로 정렬된 선수를 라운드로빈 방식으로 배분
-     * → 각 코트의 평균 실력이 비슷해짐
-     */
-    private List<List<Player>> assignPlayersToCourts(List<Player> sortedPlayers, int courtCount) {
         List<List<Player>> courts = new ArrayList<>();
-        for (int i = 0; i < courtCount; i++) {
-            courts.add(new ArrayList<>());
+        List<Player> carry = new ArrayList<>();
+
+        for (String g : gradeOrder) {
+            List<Player> gradePool = byGrade.get(g);
+            if (gradePool.isEmpty()) continue;
+            carry.addAll(gradePool);
+            while (carry.size() >= target) {
+                courts.add(new ArrayList<>(carry.subList(0, target)));
+                carry = new ArrayList<>(carry.subList(target, carry.size()));
+            }
         }
 
-        // 뱀 모양(snake) 배분
-        boolean forward = true;
-        int courtIndex = 0;
-        for (Player player : sortedPlayers) {
-            courts.get(courtIndex).add(player);
-            if (forward) {
-                courtIndex++;
-                if (courtIndex >= courtCount) {
-                    courtIndex = courtCount - 1;
-                    forward = false;
-                }
-            } else {
-                courtIndex--;
-                if (courtIndex < 0) {
-                    courtIndex = 0;
-                    forward = true;
-                }
-            }
+        if (!carry.isEmpty()) {
+            if (carry.size() >= 4) courts.add(carry);
+            else if (!courts.isEmpty()) courts.get(courts.size() - 1).addAll(carry);
+            else courts.add(carry);
         }
 
         return courts;
     }
 
     /**
-     * 코트 내 게임 대진표 생성
-     * - 6명: 2게임 (매 게임 2명 대기, 로테이션)
-     * - 7명: 3게임 (매 게임 3명 대기 또는 혼합)
-     * - 8명: 2게임 (4명 vs 4명 / 2게임 모두 다른 조합)
-     *
-     * 원칙: 같은 파트너 최대한 안 겹치게
+     * 코트 수를 requestedCourtCount에 맞게 조정.
+     * 초과 시: 인접한 가장 작은 두 코트 병합
+     * 부족 시: 가장 큰 코트를 뱀 배분으로 2분할
+     */
+    private List<List<Player>> adjustCourtCount(List<List<Player>> courts, int requested) {
+        while (courts.size() > requested) {
+            int mergeIdx = 0, minSize = Integer.MAX_VALUE;
+            for (int i = 0; i < courts.size() - 1; i++) {
+                int combined = courts.get(i).size() + courts.get(i + 1).size();
+                if (combined < minSize) { minSize = combined; mergeIdx = i; }
+            }
+            courts.get(mergeIdx).addAll(courts.get(mergeIdx + 1));
+            courts.remove(mergeIdx + 1);
+        }
+        while (courts.size() < requested) {
+            int maxIdx = 0, maxSize = 0;
+            for (int i = 0; i < courts.size(); i++) {
+                if (courts.get(i).size() > maxSize) { maxSize = courts.get(i).size(); maxIdx = i; }
+            }
+            List<Player> toSplit = courts.remove(maxIdx);
+            int half = (toSplit.size() + 1) / 2;
+            courts.add(maxIdx,     new ArrayList<>(toSplit.subList(0, half)));
+            courts.add(maxIdx + 1, new ArrayList<>(toSplit.subList(half, toSplit.size())));
+        }
+        return courts;
+    }
+
+    /**
+     * 코트 내 게임 생성
+     * gamesPerPlayer > 0: 1인당 목표 게임 수 기반으로 총 게임 수 역산
+     * gamesPerPlayer == 0: 자동 (6명 이하 2게임, 7명 이상 3게임)
      */
     private List<Game> generateGamesForCourt(List<Player> players, int gamesPerPlayer) {
         int size = players.size();
@@ -110,7 +121,6 @@ public class DrawService {
             : (size <= 6 ? 2 : 3);
 
         Map<String, Integer> partnerCount = new HashMap<>();
-
         List<Game> games = new ArrayList<>();
         List<Integer> waitingIndices = new ArrayList<>();
 
@@ -119,14 +129,12 @@ public class DrawService {
             game.setGameNumber(g + 1);
             games.add(game);
         }
-
         return games;
     }
 
     private Game createGame(List<Player> players, int gameIndex,
                              Map<String, Integer> partnerCount,
                              List<Integer> prevWaiting, int size) {
-
         List<Integer> activeIndices = new ArrayList<>();
         List<Integer> newWaiting = new ArrayList<>();
 
@@ -177,7 +185,7 @@ public class DrawService {
     /**
      * 3가지 팀 분할 중 최적 선택
      * 우선순위 1: 파트너 반복 최소화
-     * 우선순위 2: 양 팀 합산 점수 차 최소화 (±100 이내 목표)
+     * 우선순위 2: 양 팀 합산 점수 차 최소화
      */
     private int[] findBestSplit(List<Player> players, List<Integer> indices,
                                  Map<String, Integer> partnerCount) {
@@ -199,7 +207,6 @@ public class DrawService {
             int teamA = players.get(split[0]).getTotalScore() + players.get(split[1]).getTotalScore();
             int teamB = players.get(split[2]).getTotalScore() + players.get(split[3]).getTotalScore();
             int balanceScore = Math.abs(teamA - teamB);
-            // 파트너 반복 1회 = 점수차 500에 해당하는 패널티
             int score = partnerScore * 500 + balanceScore;
             if (score < bestScore) {
                 bestScore = score;
