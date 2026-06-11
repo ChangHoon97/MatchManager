@@ -35,23 +35,56 @@ public class DrawService {
 
     private List<List<Player>> assignPlayersToCourts(List<Player> sortedPlayers, int requestedCourtCount) {
         int total = sortedPlayers.size();
-        int estimatedCourts = (requestedCourtCount > 0)
-            ? requestedCourtCount
-            : Math.max(1, (int) Math.ceil((double) total / 7.0));
-        int target = (int) Math.max(4, Math.round((double) total / estimatedCourts));
-
-        List<List<Player>> courts = fillCourtsFromGrades(sortedPlayers, target);
 
         if (requestedCourtCount > 0) {
-            courts = adjustCourtCount(courts, requestedCourtCount);
+            int base  = total / requestedCourtCount;
+            int extra = total % requestedCourtCount;
+            List<Integer> sizes = new ArrayList<>();
+            for (int i = 0; i < requestedCourtCount; i++)
+                sizes.add(i < extra ? base + 1 : base);
+            return fillCourtsWithSizes(sortedPlayers, sizes);
         }
+
+        int estimatedCourts = Math.max(1, (int) Math.ceil((double) total / 7.0));
+        int target = (int) Math.max(4, Math.round((double) total / estimatedCourts));
+        return fillCourtsFromGrades(sortedPlayers, target);
+    }
+
+    /**
+     * 코트별 목표 인원(sizes)을 받아 급수 순서대로 carry 버퍼를 채워 코트 확정.
+     * 예) D(4)+E(14)+F(8), sizes=[7,7,6,6] → [D4+E3:7, E7:7, E4+F2:6, F6:6]
+     */
+    private List<List<Player>> fillCourtsWithSizes(List<Player> sortedPlayers, List<Integer> sizes) {
+        String[] gradeOrder = {"A", "B", "C", "D", "E", "F"};
+        Map<String, List<Player>> byGrade = new LinkedHashMap<>();
+        for (String g : gradeOrder) byGrade.put(g, new ArrayList<>());
+        for (Player p : sortedPlayers) byGrade.get(p.getGrade().toUpperCase()).add(p);
+
+        List<List<Player>> courts = new ArrayList<>();
+        List<Player> carry = new ArrayList<>();
+        int courtIdx = 0;
+
+        for (String g : gradeOrder) {
+            List<Player> gradePool = byGrade.get(g);
+            if (gradePool.isEmpty()) continue;
+            carry.addAll(gradePool);
+            while (courtIdx < sizes.size() && carry.size() >= sizes.get(courtIdx)) {
+                int sz = sizes.get(courtIdx++);
+                courts.add(new ArrayList<>(carry.subList(0, sz)));
+                carry = new ArrayList<>(carry.subList(sz, carry.size()));
+            }
+        }
+
+        if (!carry.isEmpty()) {
+            if (!courts.isEmpty()) courts.get(courts.size() - 1).addAll(carry);
+            else courts.add(carry);
+        }
+
         return courts;
     }
 
     /**
-     * 급수 순서(A→F)대로 carry 버퍼에 쌓고, target명이 모이면 코트 확정.
-     * D(4)처럼 target보다 적은 급수는 다음 급수 상위 선수들로 보충됨.
-     * 예) D(4)+E(14)+F(8), target=7 → [D4+E3:7, E7:7, E4+F3:7, F5:5]
+     * 급수 순서(A→F)대로 carry 버퍼에 쌓고, target명이 모이면 코트 확정 (자동 코트 수 모드).
      */
     private List<List<Player>> fillCourtsFromGrades(List<Player> sortedPlayers, int target) {
         String[] gradeOrder = {"A", "B", "C", "D", "E", "F"};
@@ -78,34 +111,6 @@ public class DrawService {
             else courts.add(carry);
         }
 
-        return courts;
-    }
-
-    /**
-     * 코트 수를 requestedCourtCount에 맞게 조정.
-     * 초과 시: 인접한 가장 작은 두 코트 병합
-     * 부족 시: 가장 큰 코트를 뱀 배분으로 2분할
-     */
-    private List<List<Player>> adjustCourtCount(List<List<Player>> courts, int requested) {
-        while (courts.size() > requested) {
-            int mergeIdx = 0, minSize = Integer.MAX_VALUE;
-            for (int i = 0; i < courts.size() - 1; i++) {
-                int combined = courts.get(i).size() + courts.get(i + 1).size();
-                if (combined < minSize) { minSize = combined; mergeIdx = i; }
-            }
-            courts.get(mergeIdx).addAll(courts.get(mergeIdx + 1));
-            courts.remove(mergeIdx + 1);
-        }
-        while (courts.size() < requested) {
-            int maxIdx = 0, maxSize = 0;
-            for (int i = 0; i < courts.size(); i++) {
-                if (courts.get(i).size() > maxSize) { maxSize = courts.get(i).size(); maxIdx = i; }
-            }
-            List<Player> toSplit = courts.remove(maxIdx);
-            int half = (toSplit.size() + 1) / 2;
-            courts.add(maxIdx,     new ArrayList<>(toSplit.subList(0, half)));
-            courts.add(maxIdx + 1, new ArrayList<>(toSplit.subList(half, toSplit.size())));
-        }
         return courts;
     }
 
