@@ -13,9 +13,8 @@
 <div class="container">
     <header>
         <div class="header-inner">
-            <h1>MATCH MANAGER</h1>
-            <img src="${pageContext.request.contextPath}/img/icon.png"
-                 alt="MatchManager 로고" class="header-icon">
+            <img src="${pageContext.request.contextPath}/img/title.png"
+                 alt="MATCH MANAGER" class="header-title-img">
         </div>
         <p class="subtitle">참가자 성함과 급수를 입력하고 대진표를 생성하세요</p>
     </header>

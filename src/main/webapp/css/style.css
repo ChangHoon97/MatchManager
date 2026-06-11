@@ -76,26 +76,15 @@ header {
 }
 
 .header-inner {
-    display: inline-flex;
-    align-items: center;
+    display: flex;
     justify-content: center;
-    gap: 14px;
     margin-bottom: 14px;
 }
 
-header h1 {
-    font-family: var(--font-title);
-    font-size: 68px;
-    color: var(--clr-teal);
-    letter-spacing: 3px;
-    line-height: 1;
-}
-
-.header-icon {
-    width: 86px;
-    height: 86px;
+.header-title-img {
+    width: auto;
+    height: 160px;
     object-fit: contain;
-    flex-shrink: 0;
 }
 
 .subtitle {
