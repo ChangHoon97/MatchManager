@@ -96,8 +96,14 @@
         <div class="footer-brand">MATCH MANAGER</div>
         <div class="footer-divider"></div>
         <div class="footer-info">
-            <span class="footer-item"><span class="footer-label">Developer</span> 이창훈</span>
-            <span class="footer-item"><span class="footer-label">Contact</span> hyo040441@gmail.com</span>
+            <div class="footer-row">
+                <span class="footer-item"><span class="footer-label">Developer</span> 이창훈</span>
+                <span class="footer-item"><span class="footer-label">Contact</span> hyo040441@gmail.com</span>
+            </div>
+            <div class="footer-row">
+                <span class="footer-item"><span class="footer-label">Designer</span> 장혜원</span>
+                <span class="footer-item"><span class="footer-label">Contact</span> ao_ong@naver.com</span>
+            </div>
         </div>
     </div>
 </footer>

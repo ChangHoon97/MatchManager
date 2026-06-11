@@ -869,9 +869,13 @@ header h1 {
 }
 
 .footer-info {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto auto;
     gap: 6px 20px;
+}
+
+.footer-row {
+    display: contents;
 }
 
 .footer-item {
