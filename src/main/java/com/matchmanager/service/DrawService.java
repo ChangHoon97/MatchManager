@@ -11,6 +11,10 @@ import java.util.stream.Collectors;
 @Service
 public class DrawService {
 
+    public List<Court> generateDraw(List<Player> players) {
+        return generateDraw(players, 0, 0);
+    }
+
     public List<Court> generateDraw(List<Player> players, int requestedCourtCount, int gamesPerPlayer) {
         players.sort(Comparator.comparingInt(Player::getTotalScore).reversed());
 
