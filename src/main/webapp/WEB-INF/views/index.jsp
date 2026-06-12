@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MatchManager — 배드민턴 대진표 생성기</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/img/icon.png">
+    <link rel="apple-touch-icon" href="${pageContext.request.contextPath}/img/icon.png">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
