@@ -65,6 +65,7 @@ function renderPlayerRow(index) {
         <input type="text"
                class="player-name-input"
                placeholder="성함을 입력해주세요"
+               maxlength="10"
                value="${escapeHtml(p.name)}"
                oninput="updatePlayer(${index}, 'name', this.value)"
                onkeydown="handleEnter(event, ${index})">
@@ -83,6 +84,7 @@ function renderPlayerRow(index) {
 }
 
 function updatePlayer(index, field, value) {
+    if (field === 'name') value = value.slice(0, 10);
     players[index][field] = value;
 }
 
@@ -157,7 +159,7 @@ function uploadExcel(input) {
     .then(result => {
         if (result.players && result.players.length > 0) {
             players = result.players.map(p => ({
-                name: p.name,
+                name: (p.name || '').slice(0, 10),
                 grade: p.grade,
                 value: p.value ?? 50
             }));

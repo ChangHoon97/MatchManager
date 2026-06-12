@@ -620,6 +620,8 @@ header {
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     background: var(--clr-white);
     border: 1.5px solid var(--clr-teal-pale);
     border-radius: var(--radius-pill);
@@ -715,6 +717,8 @@ header {
     display: flex;
     align-items: center;
     gap: 5px;
+    min-width: 0;
+    overflow-wrap: anywhere;
     background: rgba(30, 114, 114, 0.04);
     border: 1.5px solid var(--clr-teal-pale);
     border-radius: var(--radius-sm);
@@ -837,10 +841,19 @@ header {
         gap: 12px 14px;
     }
 
-    .modal-body   { padding: 16px; }
+    .modal        { padding: 12px; }
+    .modal-body   { padding: 16px 12px; }
     .modal-header { padding: 16px 18px; }
-    .modal-footer { padding: 12px 18px; gap: 8px; }
+    .modal-header h2 { font-size: 22px; }
+    .modal-footer { padding: 12px 14px; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .btn-print,
+    .btn-regenerate,
+    .btn-close    { font-size: 13px; padding: 8px 14px; }
     .games-grid   { grid-template-columns: 1fr; }
+
+    .court-section { padding: 14px; }
+    .match-area    { flex-direction: column; gap: 6px; }
+    .vs-badge      { margin-top: 0; padding: 2px 0; }
 }
 
 /* ===== 푸터 ===== */
