@@ -14,7 +14,7 @@
 
     <groupId>com.matchmanager</groupId>
     <artifactId>matchmanager</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>war</packaging>
     <name>matchmanager</name>
     <description>배드민턴 번개모임 대진표 생성기 (MatchManager)</description>
