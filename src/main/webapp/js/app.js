@@ -24,8 +24,8 @@ function totalScore(player) {
 let players = [];
 const MIN_PLAYERS = 4;
 
-function addPlayer(name = '', grade = 'C', value = 50) {
-    players.push({ name, grade, value });
+function addPlayer(name = '', grade = 'C', value = 50, gender = '') {
+    players.push({ name, grade, value, gender });
     renderPlayerRow(players.length - 1);
     updateCount();
 }
@@ -60,6 +60,8 @@ function renderPlayerRow(index) {
         `<option value="${g}" ${p.grade === g ? 'selected' : ''}>${g}</option>`
     ).join('');
 
+    const genderCls = p.gender ? ` gender-select-${p.gender}` : '';
+
     row.innerHTML = `
         <div class="player-num">${index + 1}</div>
         <input type="text"
@@ -69,6 +71,12 @@ function renderPlayerRow(index) {
                value="${escapeHtml(p.name)}"
                oninput="updatePlayer(${index}, 'name', this.value)"
                onkeydown="handleEnter(event, ${index})">
+        <select class="gender-select${genderCls}"
+                onchange="updatePlayer(${index}, 'gender', this.value); this.className='gender-select'+(this.value?' gender-select-'+this.value:'')">
+            <option value="" ${!p.gender ? 'selected' : ''}>성별</option>
+            <option value="남" ${p.gender === '남' ? 'selected' : ''}>남</option>
+            <option value="여" ${p.gender === '여' ? 'selected' : ''}>여</option>
+        </select>
         <select class="grade-select"
                 onchange="updatePlayer(${index}, 'grade', this.value)">
             ${gradeOptions}
@@ -113,22 +121,22 @@ function clearAll() {
 
 function loadSample() {
     players = [
-        { name: '김철수', grade: 'A', value: 80 },
-        { name: '이영희', grade: 'A', value: 40 },
-        { name: '박민준', grade: 'B', value: 90 },
-        { name: '최지은', grade: 'B', value: 55 },
-        { name: '정우성', grade: 'B', value: 20 },
-        { name: '한소희', grade: 'C', value: 85 },
-        { name: '오세훈', grade: 'C', value: 60 },
-        { name: '신지아', grade: 'C', value: 30 },
-        { name: '배준호', grade: 'C', value: 10 },
-        { name: '윤미래', grade: 'D', value: 75 },
-        { name: '임현식', grade: 'D', value: 45 },
-        { name: '장나라', grade: 'D', value: 15 },
-        { name: '강동원', grade: 'D', value: 5  },
-        { name: '서지수', grade: 'E', value: 70 },
-        { name: '노준혁', grade: 'E', value: 35 },
-        { name: '문채원', grade: 'F', value: 60 },
+        { name: '김철수', grade: 'A', value: 80, gender: '남' },
+        { name: '이영희', grade: 'A', value: 40, gender: '여' },
+        { name: '박민준', grade: 'B', value: 90, gender: '남' },
+        { name: '최지은', grade: 'B', value: 55, gender: '여' },
+        { name: '정우성', grade: 'B', value: 20, gender: '남' },
+        { name: '한소희', grade: 'C', value: 85, gender: '여' },
+        { name: '오세훈', grade: 'C', value: 60, gender: '남' },
+        { name: '신지아', grade: 'C', value: 30, gender: '여' },
+        { name: '배준호', grade: 'C', value: 10, gender: '남' },
+        { name: '윤미래', grade: 'D', value: 75, gender: '여' },
+        { name: '임현식', grade: 'D', value: 45, gender: '남' },
+        { name: '장나라', grade: 'D', value: 15, gender: '여' },
+        { name: '강동원', grade: 'D', value: 5,  gender: '남' },
+        { name: '서지수', grade: 'E', value: 70, gender: '여' },
+        { name: '노준혁', grade: 'E', value: 35, gender: '남' },
+        { name: '문채원', grade: 'F', value: 60, gender: '여' },
     ];
     renderAll();
 }
@@ -162,7 +170,8 @@ function uploadExcel(input) {
             players = result.players.map(p => ({
                 name: (p.name || '').slice(0, 10),
                 grade: p.grade,
-                value: p.value ?? 50
+                value: p.value ?? 50,
+                gender: p.gender || ''
             }));
             renderAll();
             hideValidation();
@@ -227,6 +236,11 @@ function generateDraw() {
         showValidation('최소 4명 이상 입력해주세요.');
         return;
     }
+    const noGender = validPlayers.filter(p => !p.gender);
+    if (noGender.length > 0) {
+        showValidation(`성별을 선택하지 않은 선수가 있습니다. (${noGender.map(p => p.name || '이름없음').join(', ')})`);
+        return;
+    }
     if (courtCount > 0 && Math.floor(validPlayers.length / courtCount) < 4) {
         const maxCourts = Math.floor(validPlayers.length / 4);
         showValidation(`코트당 최소 4명이 필요합니다. ${validPlayers.length}명으로는 최대 ${maxCourts}개 코트 설정 가능합니다.`);
@@ -278,6 +292,7 @@ function renderModalContent() {
                 ${court.players.map(p => `
                     <span class="player-chip">
                         ${escapeHtml(p.name)}
+                        ${p.gender ? `<span class="gender-badge gender-${escapeHtml(p.gender)}">${escapeHtml(p.gender)}</span>` : ''}
                         <span class="grade-badge grade-${escapeHtml(p.grade.toLowerCase())}">${escapeHtml(p.grade)}</span>
                     </span>
                 `).join('')}
@@ -326,6 +341,9 @@ function renderGameCard(game, ci, gi) {
 
 function renderSlot(player, ci, gi, role, teamClass) {
     if (player) {
+        const genderBadge = player.gender
+            ? `<span class="gender-badge gender-${escapeHtml(player.gender)}">${escapeHtml(player.gender)}</span>`
+            : '';
         return `<div class="team-player ${teamClass} dnd-item"
                      draggable="true"
                      data-ci="${ci}" data-gi="${gi}" data-role="${role}"
@@ -335,6 +353,7 @@ function renderSlot(player, ci, gi, role, teamClass) {
                      ondragleave="dndLeave(event)"
                      ondrop="dndDrop(event)">
             ${escapeHtml(player.name)}
+            ${genderBadge}
             <span class="grade-badge grade-${escapeHtml(player.grade.toLowerCase())}">${escapeHtml(player.grade)}</span>
         </div>`;
     }
