@@ -40,7 +40,7 @@ public class ExcelService {
 
             // 1행: 헤더
             Row header = sheet.createRow(0);
-            String[] titles = {"선수명", "등급 (A~F)", "수치 (0~100)"};
+            String[] titles = {"선수명", "등급 (A~F)", "수치 (0~100)", "성별 (남/여)"};
             for (int i = 0; i < titles.length; i++) {
                 Cell cell = header.createCell(i);
                 cell.setCellValue(titles[i]);
@@ -49,9 +49,9 @@ public class ExcelService {
 
             // 샘플 데이터 3행
             Object[][] samples = {
-                    {"홍길동", "A", 85},
-                    {"김영희", "B", 60},
-                    {"이철수", "C", 50},
+                    {"홍길동", "A", 85, "남"},
+                    {"김영희", "B", 60, "여"},
+                    {"이철수", "C", 50, "남"},
             };
             for (int r = 0; r < samples.length; r++) {
                 Row row = sheet.createRow(r + 1);
@@ -62,12 +62,16 @@ public class ExcelService {
                 Cell valueCell = row.createCell(2);
                 valueCell.setCellValue((int) samples[r][2]);
                 valueCell.setCellStyle(centerStyle);
+                Cell genderCell = row.createCell(3);
+                genderCell.setCellValue((String) samples[r][3]);
+                genderCell.setCellStyle(centerStyle);
             }
 
             // 열 너비
             sheet.setColumnWidth(0, 5000);
             sheet.setColumnWidth(1, 3500);
             sheet.setColumnWidth(2, 3500);
+            sheet.setColumnWidth(3, 3500);
 
             // 등급 열 드롭다운 (B2:B1000)
             DataValidationHelper dvHelper = sheet.getDataValidationHelper();
@@ -88,6 +92,14 @@ public class ExcelService {
             valueDv.setShowErrorBox(true);
             valueDv.createErrorBox("수치 오류", "0~100 사이의 정수를 입력하세요.");
             sheet.addValidationData(valueDv);
+
+            // 성별 열 드롭다운 (D2:D1000) — 선택 항목 안내용, 빈 값 허용
+            CellRangeAddressList genderRange = new CellRangeAddressList(1, 999, 3, 3);
+            DataValidationConstraint genderConstraint =
+                    dvHelper.createExplicitListConstraint(new String[]{"남", "여"});
+            DataValidation genderDv = dvHelper.createValidation(genderConstraint, genderRange);
+            genderDv.setShowErrorBox(false);
+            sheet.addValidationData(genderDv);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             wb.write(out);
@@ -114,9 +126,10 @@ public class ExcelService {
                 Row row = sheet.getRow(r);
                 if (isBlankRow(row)) continue;
 
-                String name  = cellString(row, 0);
-                String grade = cellString(row, 1).toUpperCase();
+                String name   = cellString(row, 0);
+                String grade  = cellString(row, 1).toUpperCase();
                 String valStr = cellString(row, 2);
+                String gender = cellString(row, 3);
                 int rowNum = r + 1;
                 boolean ok = true;
 
@@ -153,11 +166,21 @@ public class ExcelService {
                     }
                 }
 
+                // 성별 검증 (필수)
+                if (gender.isEmpty()) {
+                    errors.add(rowNum + "행: 성별을 입력해주세요. (남 또는 여)");
+                    ok = false;
+                } else if (!gender.equals("남") && !gender.equals("여")) {
+                    errors.add(rowNum + "행: 성별은 남 또는 여만 입력 가능합니다. (입력값: \"" + gender + "\")");
+                    ok = false;
+                }
+
                 if (ok) {
                     DrawRequestDto.PlayerDto dto = new DrawRequestDto.PlayerDto();
                     dto.setName(name);
                     dto.setGrade(grade);
                     dto.setValue(value);
+                    dto.setGender(gender);
                     players.add(dto);
                 }
             }
@@ -170,7 +193,7 @@ public class ExcelService {
 
     private boolean isBlankRow(Row row) {
         if (row == null) return true;
-        for (int c = 0; c < 3; c++) {
+        for (int c = 0; c < 4; c++) {
             if (!cellString(row, c).isEmpty()) return false;
         }
         return true;

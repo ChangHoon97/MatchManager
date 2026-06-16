@@ -489,6 +489,61 @@ header {
 .grade-e { background: #B8882A; }
 .grade-f { background: #C06040; }
 
+/* ===== 성별 셀렉트 ===== */
+.gender-select {
+    width: 68px;
+    height: 50px;
+    background: var(--clr-white);
+    color: var(--clr-text);
+    border: 2px solid var(--clr-teal-mid);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-size: 13px;
+    text-align: center;
+    text-align-last: center;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    padding: 0 4px;
+    outline: none;
+    transition: box-shadow 0.2s, background 0.15s, color 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+}
+
+.gender-select:focus {
+    box-shadow: 0 0 0 3px rgba(30, 114, 114, 0.12);
+}
+
+.gender-select-남 {
+    background: #4A90D9;
+    color: #ffffff;
+    border-color: #3a7bc8;
+}
+
+.gender-select-여 {
+    background: #E8829B;
+    color: #ffffff;
+    border-color: #d06080;
+}
+
+/* ===== 성별 뱃지 (원형) ===== */
+.gender-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: bold;
+    color: #ffffff;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.gender-남 { background: #4A90D9; }
+.gender-여 { background: #E8829B; }
+
 /* ===== 점수 태그 ===== */
 .score-tag {
     display: inline-block;
@@ -821,6 +876,7 @@ header {
     .player-row { gap: 8px; }
     .player-num { width: 40px; height: 40px; font-size: 18px; }
     .player-name-input { height: 44px; font-size: 14px; padding: 0 16px; }
+    .gender-select { width: 56px; height: 44px; font-size: 12px; }
     .grade-select { width: 70px; height: 44px; font-size: 16px; }
     .value-input  { width: 76px; height: 44px; font-size: 16px; }
 
