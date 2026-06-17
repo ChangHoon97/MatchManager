@@ -504,7 +504,10 @@ header {
     appearance: none;
     -webkit-appearance: none;
     cursor: pointer;
-    padding: 0 4px;
+    padding: 0 24px 0 8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%231E7272' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
     outline: none;
     transition: box-shadow 0.2s, background 0.15s, color 0.15s, border-color 0.15s;
     flex-shrink: 0;
@@ -512,18 +515,26 @@ header {
 
 .gender-select:focus {
     box-shadow: 0 0 0 3px rgba(30, 114, 114, 0.12);
+    outline: none;
+    border-color: var(--clr-teal-mid);
 }
 
 .gender-select-남 {
     background: #4A90D9;
     color: #ffffff;
     border-color: #3a7bc8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
 }
 
 .gender-select-여 {
     background: #E8829B;
     color: #ffffff;
     border-color: #d06080;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
 }
 
 /* ===== 성별 뱃지 (원형) ===== */
@@ -876,7 +887,7 @@ header {
     .player-row { gap: 8px; }
     .player-num { width: 40px; height: 40px; font-size: 18px; }
     .player-name-input { height: 44px; font-size: 14px; padding: 0 16px; }
-    .gender-select { width: 56px; height: 44px; font-size: 12px; }
+    .gender-select { width: 56px; height: 44px; font-size: 12px; padding: 0 20px 0 6px; }
     .grade-select { width: 70px; height: 44px; font-size: 16px; }
     .value-input  { width: 76px; height: 44px; font-size: 16px; }
 
