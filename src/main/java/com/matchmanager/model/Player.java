@@ -21,12 +21,6 @@ public class Player {
         this.rating = 50;
     }
 
-    public Player(String name, String grade, int value) {
-        this.name = name;
-        this.grade = grade;
-        this.value = value;
-    }
-
     /** A=6, B=5 ... F=1 — 클수록 강함 */
     public int getGradeValue() {
         return switch (grade.toUpperCase()) {
