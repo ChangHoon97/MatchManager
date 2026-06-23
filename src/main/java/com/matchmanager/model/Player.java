@@ -11,14 +11,14 @@ public class Player {
 
     private String name;
     private String grade; // A~F
-    private int value;    // 0~100 (높을수록 해당 급수 내 강함)
+    private int rating;   // 0~100 (높을수록 해당 급수 내 강함)
     private String gender; // "남" or "여" (optional)
     private int age;      // 0=미입력, 20/30/40/45/50/55/60/65
 
     public Player(String name, String grade) {
         this.name = name;
         this.grade = grade;
-        this.value = 50;
+        this.rating = 50;
     }
 
     public Player(String name, String grade, int value) {
@@ -43,6 +43,6 @@ public class Player {
 
     /** 0~600 범위. 높을수록 강함. A+100=600, F+0=0 */
     public int getTotalScore() {
-        return (getGradeValue() - 1) * 100 + value;
+        return (getGradeValue() - 1) * 100 + rating;
     }
 }

@@ -41,7 +41,7 @@ public class DrawController {
         int a = 0;
         List<Player> players = new ArrayList<>();
         for (DrawRequestDto.PlayerDto dto : request.getPlayers()) {
-            players.add(new Player(dto.getName(), dto.getGrade(), dto.getValue(), dto.getGender(), dto.getAge()));
+            players.add(new Player(dto.getName(), dto.getGrade(), dto.getRating(), dto.getGender(), dto.getAge()));
         }
         return drawService.generateDraw(players, request.getCourtCount(), request.getGamesPerPlayer());
     }
