@@ -24,8 +24,8 @@ function totalScore(player) {
 let players = [];
 const MIN_PLAYERS = 4;
 
-function addPlayer(name = '', grade = 'C', value = 50, gender = '') {
-    players.push({ name, grade, value, gender });
+function addPlayer(name = '', grade = 'C', value = 50, gender = '', age = 0) {
+    players.push({ name, grade, value, gender, age });
     renderPlayerRow(players.length - 1);
     updateCount();
 }
@@ -60,6 +60,11 @@ function renderPlayerRow(index) {
         `<option value="${g}" ${p.grade === g ? 'selected' : ''}>${g}</option>`
     ).join('');
 
+    const ages = [20, 30, 40, 45, 50, 55, 60, 65];
+    const ageOptions = ages.map(a =>
+        `<option value="${a}" ${p.age === a ? 'selected' : ''}>${a}</option>`
+    ).join('');
+
     const genderCls = p.gender ? ` gender-select-${p.gender}` : '';
 
     row.innerHTML = `
@@ -77,6 +82,11 @@ function renderPlayerRow(index) {
                 <option value="" ${!p.gender ? 'selected' : ''}>성별</option>
                 <option value="남" ${p.gender === '남' ? 'selected' : ''}>남</option>
                 <option value="여" ${p.gender === '여' ? 'selected' : ''}>여</option>
+            </select>
+            <select class="age-select"
+                    onchange="updatePlayer(${index}, 'age', +this.value)">
+                <option value="0" ${!p.age ? 'selected' : ''}>나이</option>
+                ${ageOptions}
             </select>
             <select class="grade-select"
                     onchange="updatePlayer(${index}, 'grade', this.value)">
@@ -123,22 +133,22 @@ function clearAll() {
 
 function loadSample() {
     players = [
-        { name: '김철수', grade: 'A', value: 80, gender: '남' },
-        { name: '이영희', grade: 'A', value: 40, gender: '여' },
-        { name: '박민준', grade: 'B', value: 90, gender: '남' },
-        { name: '최지은', grade: 'B', value: 55, gender: '여' },
-        { name: '정우성', grade: 'B', value: 20, gender: '남' },
-        { name: '한소희', grade: 'C', value: 85, gender: '여' },
-        { name: '오세훈', grade: 'C', value: 60, gender: '남' },
-        { name: '신지아', grade: 'C', value: 30, gender: '여' },
-        { name: '배준호', grade: 'C', value: 10, gender: '남' },
-        { name: '윤미래', grade: 'D', value: 75, gender: '여' },
-        { name: '임현식', grade: 'D', value: 45, gender: '남' },
-        { name: '장나라', grade: 'D', value: 15, gender: '여' },
-        { name: '강동원', grade: 'D', value: 5,  gender: '남' },
-        { name: '서지수', grade: 'E', value: 70, gender: '여' },
-        { name: '노준혁', grade: 'E', value: 35, gender: '남' },
-        { name: '문채원', grade: 'F', value: 60, gender: '여' },
+        { name: '김철수', grade: 'A', value: 80, gender: '남', age: 30 },
+        { name: '이영희', grade: 'A', value: 40, gender: '여', age: 40 },
+        { name: '박민준', grade: 'B', value: 90, gender: '남', age: 45 },
+        { name: '최지은', grade: 'B', value: 55, gender: '여', age: 50 },
+        { name: '정우성', grade: 'B', value: 20, gender: '남', age: 20 },
+        { name: '한소희', grade: 'C', value: 85, gender: '여', age: 30 },
+        { name: '오세훈', grade: 'C', value: 60, gender: '남', age: 55 },
+        { name: '신지아', grade: 'C', value: 30, gender: '여', age: 40 },
+        { name: '배준호', grade: 'C', value: 10, gender: '남', age: 60 },
+        { name: '윤미래', grade: 'D', value: 75, gender: '여', age: 45 },
+        { name: '임현식', grade: 'D', value: 45, gender: '남', age: 50 },
+        { name: '장나라', grade: 'D', value: 15, gender: '여', age: 65 },
+        { name: '강동원', grade: 'D', value: 5,  gender: '남', age: 40 },
+        { name: '서지수', grade: 'E', value: 70, gender: '여', age: 55 },
+        { name: '노준혁', grade: 'E', value: 35, gender: '남', age: 30 },
+        { name: '문채원', grade: 'F', value: 60, gender: '여', age: 60 },
     ];
     renderAll();
 }
@@ -173,7 +183,8 @@ function uploadExcel(input) {
                 name: (p.name || '').slice(0, 10),
                 grade: p.grade,
                 value: p.value ?? 50,
-                gender: p.gender || ''
+                gender: p.gender || '',
+                age: p.age || 0
             }));
             renderAll();
             hideValidation();
@@ -294,6 +305,7 @@ function renderModalContent() {
                 ${court.players.map(p => `
                     <span class="player-chip">
                         ${escapeHtml(p.name)}
+                        ${p.age > 0 ? `<span class="age-badge">${p.age}</span>` : ''}
                         ${p.gender ? `<span class="gender-badge gender-${escapeHtml(p.gender)}">${escapeHtml(p.gender)}</span>` : ''}
                         <span class="grade-badge grade-${escapeHtml(p.grade.toLowerCase())}">${escapeHtml(p.grade)}</span>
                     </span>
@@ -346,6 +358,9 @@ function renderSlot(player, ci, gi, role, teamClass) {
         const genderBadge = player.gender
             ? `<span class="gender-badge gender-${escapeHtml(player.gender)}">${escapeHtml(player.gender)}</span>`
             : '';
+        const ageBadge = player.age > 0
+            ? `<span class="age-badge">${player.age}</span>`
+            : '';
         return `<div class="team-player ${teamClass} dnd-item"
                      draggable="true"
                      data-ci="${ci}" data-gi="${gi}" data-role="${role}"
@@ -355,6 +370,7 @@ function renderSlot(player, ci, gi, role, teamClass) {
                      ondragleave="dndLeave(event)"
                      ondrop="dndDrop(event)">
             ${escapeHtml(player.name)}
+            ${ageBadge}
             ${genderBadge}
             <span class="grade-badge grade-${escapeHtml(player.grade.toLowerCase())}">${escapeHtml(player.grade)}</span>
         </div>`;
@@ -468,6 +484,36 @@ function closeModal() {
 function regenerate() {
     closeModal();
     setTimeout(generateDraw, 100);
+}
+
+// ========== 엑셀 다운로드 ==========
+
+function downloadExcel() {
+    if (!courtsData || courtsData.length === 0) return;
+    fetch('/api/draw/excel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(courtsData)
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('엑셀 생성 실패');
+        return res.blob();
+    })
+    .then(blob => {
+        const d = new Date();
+        const yyyymmdd = d.getFullYear().toString()
+            + String(d.getMonth() + 1).padStart(2, '0')
+            + String(d.getDate()).padStart(2, '0');
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `대진표_${yyyymmdd}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    })
+    .catch(() => alert('엑셀 다운로드 중 오류가 발생했습니다.'));
 }
 
 // ========== 초기화 ==========

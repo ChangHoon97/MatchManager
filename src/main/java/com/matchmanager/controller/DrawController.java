@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ public class DrawController {
     public List<Court> generateDrawApi(@Valid @RequestBody DrawRequestDto request) {
         List<Player> players = new ArrayList<>();
         for (DrawRequestDto.PlayerDto dto : request.getPlayers()) {
-            players.add(new Player(dto.getName(), dto.getGrade(), dto.getValue(), dto.getGender()));
+            players.add(new Player(dto.getName(), dto.getGrade(), dto.getValue(), dto.getGender(), dto.getAge()));
         }
         return drawService.generateDraw(players, request.getCourtCount(), request.getGamesPerPlayer());
     }
@@ -81,5 +83,19 @@ public class DrawController {
                     new ExcelUploadResult(false,
                             List.of("파일을 읽는 중 오류가 발생했습니다: " + e.getMessage()), List.of()));
         }
+    }
+
+    @PostMapping("/api/draw/excel")
+    public ResponseEntity<byte[]> downloadDrawExcel(@RequestBody List<Court> courts) throws IOException {
+        byte[] bytes = excelService.createDrawExcel(courts);
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String filename = "대진표_" + date + ".xlsx";
+        String encoded = java.net.URLEncoder.encode(filename, java.nio.charset.StandardCharsets.UTF_8)
+                .replace("+", "%20");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
     }
 }
