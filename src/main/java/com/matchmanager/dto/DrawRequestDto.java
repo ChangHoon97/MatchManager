@@ -43,7 +43,7 @@ public class DrawRequestDto {
         @Pattern(regexp = "^(남|여)$", message = "성별은 남 또는 여만 입력 가능합니다.")
         private String gender;
 
-        @Min(value = 0, message = "나이는 0 이상이어야 합니다.")
-        private int age = 0; // 0 = 미입력
+        @Min(value = 1, message = "나이를 선택해주세요.")
+        private int age;
     }
 }

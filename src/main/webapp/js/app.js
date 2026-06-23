@@ -77,12 +77,6 @@ function renderPlayerRow(index) {
                oninput="updatePlayer(${index}, 'name', this.value)"
                onkeydown="handleEnter(event, ${index})">
         <div class="player-controls">
-            <select class="gender-select${genderCls}"
-                    onchange="updatePlayer(${index}, 'gender', this.value); this.className='gender-select'+(this.value?' gender-select-'+this.value:'')">
-                <option value="" ${!p.gender ? 'selected' : ''}>성별</option>
-                <option value="남" ${p.gender === '남' ? 'selected' : ''}>남</option>
-                <option value="여" ${p.gender === '여' ? 'selected' : ''}>여</option>
-            </select>
             <select class="age-select"
                     onchange="updatePlayer(${index}, 'age', +this.value)">
                 <option value="0" ${!p.age ? 'selected' : ''}>나이</option>
@@ -91,6 +85,12 @@ function renderPlayerRow(index) {
             <select class="grade-select"
                     onchange="updatePlayer(${index}, 'grade', this.value)">
                 ${gradeOptions}
+            </select>
+            <select class="gender-select${genderCls}"
+                    onchange="updatePlayer(${index}, 'gender', this.value); this.className='gender-select'+(this.value?' gender-select-'+this.value:'')">
+                <option value="" ${!p.gender ? 'selected' : ''}>성별</option>
+                <option value="남" ${p.gender === '남' ? 'selected' : ''}>남</option>
+                <option value="여" ${p.gender === '여' ? 'selected' : ''}>여</option>
             </select>
             <input type="number"
                    class="value-input"
@@ -254,6 +254,11 @@ function generateDraw() {
         showValidation(`성별을 선택하지 않은 선수가 있습니다. (${noGender.map(p => p.name || '이름없음').join(', ')})`);
         return;
     }
+    const noAge = validPlayers.filter(p => !p.age || p.age === 0);
+    if (noAge.length > 0) {
+        showValidation(`나이를 선택하지 않은 선수가 있습니다. (${noAge.map(p => p.name || '이름없음').join(', ')})`);
+        return;
+    }
     if (courtCount > 0 && Math.floor(validPlayers.length / courtCount) < 4) {
         const maxCourts = Math.floor(validPlayers.length / 4);
         showValidation(`코트당 최소 4명이 필요합니다. ${validPlayers.length}명으로는 최대 ${maxCourts}개 코트 설정 가능합니다.`);
@@ -306,8 +311,8 @@ function renderModalContent() {
                     <span class="player-chip">
                         ${escapeHtml(p.name)}
                         ${p.age > 0 ? `<span class="age-badge">${p.age}</span>` : ''}
-                        ${p.gender ? `<span class="gender-badge gender-${escapeHtml(p.gender)}">${escapeHtml(p.gender)}</span>` : ''}
                         <span class="grade-badge grade-${escapeHtml(p.grade.toLowerCase())}">${escapeHtml(p.grade)}</span>
+                        ${p.gender ? `<span class="gender-badge gender-${escapeHtml(p.gender)}">${escapeHtml(p.gender)}</span>` : ''}
                     </span>
                 `).join('')}
             </div>
@@ -371,8 +376,8 @@ function renderSlot(player, ci, gi, role, teamClass) {
                      ondrop="dndDrop(event)">
             ${escapeHtml(player.name)}
             ${ageBadge}
-            ${genderBadge}
             <span class="grade-badge grade-${escapeHtml(player.grade.toLowerCase())}">${escapeHtml(player.grade)}</span>
+            ${genderBadge}
         </div>`;
     }
     return `<div class="team-player ${teamClass} dnd-empty"
