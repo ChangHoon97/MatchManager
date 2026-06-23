@@ -38,7 +38,6 @@ public class DrawController {
     @PostMapping("/api/draw")
     @ResponseBody
     public List<Court> generateDrawApi(@Valid @RequestBody DrawRequestDto request) {
-        int a = 0;
         List<Player> players = new ArrayList<>();
         for (DrawRequestDto.PlayerDto dto : request.getPlayers()) {
             players.add(new Player(dto.getName(), dto.getGrade(), dto.getRating(), dto.getGender(), dto.getAge()));
