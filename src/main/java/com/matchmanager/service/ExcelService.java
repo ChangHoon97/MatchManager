@@ -165,15 +165,15 @@ public class ExcelService {
                     ok = false;
                 }
 
-                int value = 50;
+                int rating = 50;
                 if (valStr.isEmpty()) {
                     errors.add(rowNum + "행: 수치가 비어있습니다. (0~100 정수를 입력하세요)");
                     ok = false;
                 } else {
                     try {
-                        value = Integer.parseInt(valStr);
-                        if (value < 0 || value > 100) {
-                            errors.add(rowNum + "행: 수치는 0~100 범위여야 합니다. (입력값: " + value + ")");
+                        rating = Integer.parseInt(valStr);
+                        if (rating < 0 || rating > 100) {
+                            errors.add(rowNum + "행: 수치는 0~100 범위여야 합니다. (입력값: " + rating + ")");
                             ok = false;
                         }
                     } catch (NumberFormatException e) {
@@ -211,7 +211,7 @@ public class ExcelService {
                     DrawRequestDto.PlayerDto dto = new DrawRequestDto.PlayerDto();
                     dto.setName(name);
                     dto.setGrade(grade);
-                    dto.setValue(value);
+                    dto.setRating(rating);
                     dto.setGender(gender);
                     dto.setAge(age);
                     players.add(dto);

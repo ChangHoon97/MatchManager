@@ -40,7 +40,7 @@ public class DrawController {
     public List<Court> generateDrawApi(@Valid @RequestBody DrawRequestDto request) {
         List<Player> players = new ArrayList<>();
         for (DrawRequestDto.PlayerDto dto : request.getPlayers()) {
-            players.add(new Player(dto.getName(), dto.getGrade(), dto.getValue(), dto.getGender(), dto.getAge()));
+            players.add(new Player(dto.getName(), dto.getGrade(), dto.getRating(), dto.getGender(), dto.getAge()));
         }
         return drawService.generateDraw(players, request.getCourtCount(), request.getGamesPerPlayer());
     }

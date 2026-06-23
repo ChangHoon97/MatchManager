@@ -37,7 +37,7 @@ public class DrawRequestDto {
 
         @Min(value = 0, message = "수치는 0 이상이어야 합니다.")
         @Max(value = 100, message = "수치는 100 이하여야 합니다.")
-        private int value = 50;
+        private int rating = 50;
 
         @NotBlank(message = "성별을 선택해주세요.")
         @Pattern(regexp = "^(남|여)$", message = "성별은 남 또는 여만 입력 가능합니다.")

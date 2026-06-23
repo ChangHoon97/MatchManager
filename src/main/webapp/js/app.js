@@ -16,7 +16,7 @@ function gradeNum(grade) {
 
 function totalScore(player) {
     if (!player) return 0;
-    return (gradeNum(player.grade) - 1) * 100 + (player.value ?? 50);
+    return (gradeNum(player.grade) - 1) * 100 + (player.rating ?? 50);
 }
 
 // ========== 선수 관리 ==========
@@ -24,8 +24,8 @@ function totalScore(player) {
 let players = [];
 const MIN_PLAYERS = 4;
 
-function addPlayer(name = '', grade = 'C', value = 50, gender = '', age = 0) {
-    players.push({ name, grade, value, gender, age });
+function addPlayer(name = '', grade = 'C', rating = 50, gender = '', age = 0) {
+    players.push({ name, grade, rating, gender, age });
     renderPlayerRow(players.length - 1);
     updateCount();
 }
@@ -70,6 +70,8 @@ function renderPlayerRow(index) {
     row.innerHTML = `
         <div class="player-num">${index + 1}</div>
         <input type="text"
+               id="player-name-${index}"
+               name="player[${index}][name]"
                class="player-name-input"
                placeholder="성함을 입력해주세요"
                maxlength="10"
@@ -77,26 +79,34 @@ function renderPlayerRow(index) {
                oninput="updatePlayer(${index}, 'name', this.value)"
                onkeydown="handleEnter(event, ${index})">
         <div class="player-controls">
-            <select class="age-select"
+            <select id="player-age-${index}"
+                    name="player[${index}][age]"
+                    class="age-select"
                     onchange="updatePlayer(${index}, 'age', +this.value)">
                 <option value="0" ${!p.age ? 'selected' : ''}>나이</option>
                 ${ageOptions}
             </select>
-            <select class="grade-select"
+            <select id="player-grade-${index}"
+                    name="player[${index}][grade]"
+                    class="grade-select"
                     onchange="updatePlayer(${index}, 'grade', this.value)">
                 ${gradeOptions}
             </select>
-            <select class="gender-select${genderCls}"
+            <select id="player-gender-${index}"
+                    name="player[${index}][gender]"
+                    class="gender-select${genderCls}"
                     onchange="updatePlayer(${index}, 'gender', this.value); this.className='gender-select'+(this.value?' gender-select-'+this.value:'')">
                 <option value="" ${!p.gender ? 'selected' : ''}>성별</option>
                 <option value="남" ${p.gender === '남' ? 'selected' : ''}>남</option>
                 <option value="여" ${p.gender === '여' ? 'selected' : ''}>여</option>
             </select>
             <input type="number"
+                   id="player-rating-${index}"
+                   name="player[${index}][rating]"
                    class="value-input"
                    min="0" max="100"
-                   value="${p.value}"
-                   oninput="this.value = Math.min(100, Math.max(0, +this.value || 0)); updatePlayer(${index}, 'value', +this.value)">
+                   value="${p.rating}"
+                   oninput="this.value = Math.min(100, Math.max(0, +this.value || 0)); updatePlayer(${index}, 'rating', +this.value)">
             <button class="btn-remove" onclick="removePlayer(${index})" title="삭제">✕</button>
         </div>
     `;
@@ -133,22 +143,22 @@ function clearAll() {
 
 function loadSample() {
     players = [
-        { name: '김철수', grade: 'A', value: 80, gender: '남', age: 30 },
-        { name: '이영희', grade: 'A', value: 40, gender: '여', age: 40 },
-        { name: '박민준', grade: 'B', value: 90, gender: '남', age: 45 },
-        { name: '최지은', grade: 'B', value: 55, gender: '여', age: 50 },
-        { name: '정우성', grade: 'B', value: 20, gender: '남', age: 20 },
-        { name: '한소희', grade: 'C', value: 85, gender: '여', age: 30 },
-        { name: '오세훈', grade: 'C', value: 60, gender: '남', age: 55 },
-        { name: '신지아', grade: 'C', value: 30, gender: '여', age: 40 },
-        { name: '배준호', grade: 'C', value: 10, gender: '남', age: 60 },
-        { name: '윤미래', grade: 'D', value: 75, gender: '여', age: 45 },
-        { name: '임현식', grade: 'D', value: 45, gender: '남', age: 50 },
-        { name: '장나라', grade: 'D', value: 15, gender: '여', age: 65 },
-        { name: '강동원', grade: 'D', value: 5,  gender: '남', age: 40 },
-        { name: '서지수', grade: 'E', value: 70, gender: '여', age: 55 },
-        { name: '노준혁', grade: 'E', value: 35, gender: '남', age: 30 },
-        { name: '문채원', grade: 'F', value: 60, gender: '여', age: 60 },
+        { name: '김철수', grade: 'A', rating: 80, gender: '남', age: 30 },
+        { name: '이영희', grade: 'A', rating: 40, gender: '여', age: 40 },
+        { name: '박민준', grade: 'B', rating: 90, gender: '남', age: 45 },
+        { name: '최지은', grade: 'B', rating: 55, gender: '여', age: 50 },
+        { name: '정우성', grade: 'B', rating: 20, gender: '남', age: 20 },
+        { name: '한소희', grade: 'C', rating: 85, gender: '여', age: 30 },
+        { name: '오세훈', grade: 'C', rating: 60, gender: '남', age: 55 },
+        { name: '신지아', grade: 'C', rating: 30, gender: '여', age: 40 },
+        { name: '배준호', grade: 'C', rating: 10, gender: '남', age: 60 },
+        { name: '윤미래', grade: 'D', rating: 75, gender: '여', age: 45 },
+        { name: '임현식', grade: 'D', rating: 45, gender: '남', age: 50 },
+        { name: '장나라', grade: 'D', rating: 15, gender: '여', age: 65 },
+        { name: '강동원', grade: 'D', rating: 5,  gender: '남', age: 40 },
+        { name: '서지수', grade: 'E', rating: 70, gender: '여', age: 55 },
+        { name: '노준혁', grade: 'E', rating: 35, gender: '남', age: 30 },
+        { name: '문채원', grade: 'F', rating: 60, gender: '여', age: 60 },
     ];
     renderAll();
 }
@@ -182,7 +192,7 @@ function uploadExcel(input) {
             players = result.players.map(p => ({
                 name: (p.name || '').slice(0, 10),
                 grade: p.grade,
-                value: p.value ?? 50,
+                rating: p.rating ?? 50,
                 gender: p.gender || '',
                 age: p.age || 0
             }));
