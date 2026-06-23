@@ -188,8 +188,10 @@ class DrawServiceTest {
     class GradeValue {
 
         @Test
-        @DisplayName("A=6(강), F=1(약), 알 수 없는 등급은 0")
+        @DisplayName("S=7(최강), A=6, F=1(약), 알 수 없는 등급은 0")
         void gradeMapping() {
+            assertThat(new Player("x", "S").getGradeValue()).isEqualTo(7);
+            assertThat(new Player("x", "s").getGradeValue()).isEqualTo(7);
             assertThat(new Player("x", "A").getGradeValue()).isEqualTo(6);
             assertThat(new Player("x", "F").getGradeValue()).isEqualTo(1);
             assertThat(new Player("x", "a").getGradeValue()).isEqualTo(6);
@@ -199,10 +201,10 @@ class DrawServiceTest {
         @Test
         @DisplayName("totalScore: A+100=600(최강), F+0=0(최약), 경계값 A+0=B+100=500")
         void totalScoreMapping() {
-            assertThat(new Player("x", "A", 100).getTotalScore()).isEqualTo(600);
-            assertThat(new Player("x", "F", 0).getTotalScore()).isEqualTo(0);
-            assertThat(new Player("x", "A", 0).getTotalScore()).isEqualTo(500);
-            assertThat(new Player("x", "B", 100).getTotalScore()).isEqualTo(500);
+            assertThat(new Player("x", "A", 100, "", 0).getTotalScore()).isEqualTo(600);
+            assertThat(new Player("x", "F", 0, "", 0).getTotalScore()).isEqualTo(0);
+            assertThat(new Player("x", "A", 0, "", 0).getTotalScore()).isEqualTo(500);
+            assertThat(new Player("x", "B", 100, "", 0).getTotalScore()).isEqualTo(500);
         }
     }
 }

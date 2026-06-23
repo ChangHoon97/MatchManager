@@ -13,6 +13,7 @@ public class Player {
     private String grade; // A~F
     private int value;    // 0~100 (높을수록 해당 급수 내 강함)
     private String gender; // "남" or "여" (optional)
+    private int age;      // 0=미입력, 20/30/40/45/50/55/60/65
 
     public Player(String name, String grade) {
         this.name = name;

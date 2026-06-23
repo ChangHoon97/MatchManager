@@ -49,7 +49,7 @@ public class DrawService {
             return fillCourtsWithSizes(sortedPlayers, sizes);
         }
 
-        int estimatedCourts = Math.max(1, (int) Math.ceil((double) total / 7.0));
+        int estimatedCourts = Math.max(1, (int) Math.ceil((double) total / 8.0));
         int target = (int) Math.max(4, Math.round((double) total / estimatedCourts));
         return fillCourtsFromGrades(sortedPlayers, target);
     }
@@ -88,31 +88,19 @@ public class DrawService {
     }
 
     /**
-     * 급수 순서(A→F)대로 carry 버퍼에 쌓고, target명이 모이면 코트 확정 (자동 코트 수 모드).
+     * Snake 방식 배분: 총점 내림차순으로 정렬된 선수를 코트에 순환 배정.
+     * 짝수 라운드는 좌→우, 홀수 라운드는 우→좌로 배정해 코트 간 평균 급수를 균등화.
      */
     private List<List<Player>> fillCourtsFromGrades(List<Player> sortedPlayers, int target) {
-        String[] gradeOrder = {"S", "A", "B", "C", "D", "E", "F"};
-        Map<String, List<Player>> byGrade = new LinkedHashMap<>();
-        for (String g : gradeOrder) byGrade.put(g, new ArrayList<>());
-        for (Player p : sortedPlayers) byGrade.get(p.getGrade().toUpperCase()).add(p);
-
+        int numCourts = (int) Math.ceil((double) sortedPlayers.size() / target);
         List<List<Player>> courts = new ArrayList<>();
-        List<Player> carry = new ArrayList<>();
+        for (int i = 0; i < numCourts; i++) courts.add(new ArrayList<>());
 
-        for (String g : gradeOrder) {
-            List<Player> gradePool = byGrade.get(g);
-            if (gradePool.isEmpty()) continue;
-            carry.addAll(gradePool);
-            while (carry.size() >= target) {
-                courts.add(new ArrayList<>(carry.subList(0, target)));
-                carry = new ArrayList<>(carry.subList(target, carry.size()));
-            }
-        }
-
-        if (!carry.isEmpty()) {
-            if (carry.size() >= 4) courts.add(carry);
-            else if (!courts.isEmpty()) courts.get(courts.size() - 1).addAll(carry);
-            else courts.add(carry);
+        for (int i = 0; i < sortedPlayers.size(); i++) {
+            int round = i / numCourts;
+            int pos = i % numCourts;
+            int courtIdx = (round % 2 == 0) ? pos : (numCourts - 1 - pos);
+            courts.get(courtIdx).add(sortedPlayers.get(i));
         }
 
         return courts;

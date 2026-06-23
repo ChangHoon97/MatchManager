@@ -119,9 +119,10 @@
             <!-- 결과가 여기에 출력됨 -->
         </div>
         <div class="modal-footer">
-            <button class="btn btn-print"      onclick="window.print()">🖨️ 인쇄</button>
-            <button class="btn btn-regenerate" onclick="regenerate()">🔄 다시 생성</button>
-            <button class="btn btn-close"      onclick="closeModal()">닫기</button>
+            <button class="btn btn-excel-result" onclick="downloadExcel()">📊 엑셀 다운로드</button>
+            <button class="btn btn-print"        onclick="window.print()">🖨️ 인쇄</button>
+            <button class="btn btn-regenerate"   onclick="regenerate()">🔄 다시 생성</button>
+            <button class="btn btn-close"        onclick="closeModal()">닫기</button>
         </div>
     </div>
 </div>
