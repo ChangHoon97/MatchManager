@@ -40,7 +40,7 @@ public class ExcelService {
 
             // 1행: 헤더
             Row header = sheet.createRow(0);
-            String[] titles = {"선수명", "등급 (A~F)", "수치 (0~100)", "성별 (남/여)"};
+            String[] titles = {"선수명", "등급 (S~F)", "수치 (0~100)", "성별 (남/여)"};
             for (int i = 0; i < titles.length; i++) {
                 Cell cell = header.createCell(i);
                 cell.setCellValue(titles[i]);
@@ -77,10 +77,10 @@ public class ExcelService {
             DataValidationHelper dvHelper = sheet.getDataValidationHelper();
             CellRangeAddressList gradeRange = new CellRangeAddressList(1, 999, 1, 1);
             DataValidationConstraint gradeConstraint =
-                    dvHelper.createExplicitListConstraint(new String[]{"A", "B", "C", "D", "E", "F"});
+                    dvHelper.createExplicitListConstraint(new String[]{"S", "A", "B", "C", "D", "E", "F"});
             DataValidation gradeDv = dvHelper.createValidation(gradeConstraint, gradeRange);
             gradeDv.setShowErrorBox(true);
-            gradeDv.createErrorBox("등급 오류", "A~F 중 하나를 입력하세요.");
+            gradeDv.createErrorBox("등급 오류", "S~F 중 하나를 입력하세요.");
             sheet.addValidationData(gradeDv);
 
             // 수치 열 범위 검증 (C2:C1000)
@@ -143,8 +143,8 @@ public class ExcelService {
                 }
 
                 // 등급 검증
-                if (!grade.matches("[A-F]")) {
-                    errors.add(rowNum + "행: 등급은 A~F 중 하나여야 합니다. (입력값: \"" + cellString(row, 1) + "\")");
+                if (!grade.matches("[SA-F]")) {
+                    errors.add(rowNum + "행: 등급은 S~F 중 하나여야 합니다. (입력값: \"" + cellString(row, 1) + "\")");
                     ok = false;
                 }
 

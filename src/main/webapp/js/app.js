@@ -71,22 +71,24 @@ function renderPlayerRow(index) {
                value="${escapeHtml(p.name)}"
                oninput="updatePlayer(${index}, 'name', this.value)"
                onkeydown="handleEnter(event, ${index})">
-        <select class="gender-select${genderCls}"
-                onchange="updatePlayer(${index}, 'gender', this.value); this.className='gender-select'+(this.value?' gender-select-'+this.value:'')">
-            <option value="" ${!p.gender ? 'selected' : ''}>성별</option>
-            <option value="남" ${p.gender === '남' ? 'selected' : ''}>남</option>
-            <option value="여" ${p.gender === '여' ? 'selected' : ''}>여</option>
-        </select>
-        <select class="grade-select"
-                onchange="updatePlayer(${index}, 'grade', this.value)">
-            ${gradeOptions}
-        </select>
-        <input type="number"
-               class="value-input"
-               min="0" max="100"
-               value="${p.value}"
-               oninput="this.value = Math.min(100, Math.max(0, +this.value || 0)); updatePlayer(${index}, 'value', +this.value)">
-        <button class="btn-remove" onclick="removePlayer(${index})" title="삭제">✕</button>
+        <div class="player-controls">
+            <select class="gender-select${genderCls}"
+                    onchange="updatePlayer(${index}, 'gender', this.value); this.className='gender-select'+(this.value?' gender-select-'+this.value:'')">
+                <option value="" ${!p.gender ? 'selected' : ''}>성별</option>
+                <option value="남" ${p.gender === '남' ? 'selected' : ''}>남</option>
+                <option value="여" ${p.gender === '여' ? 'selected' : ''}>여</option>
+            </select>
+            <select class="grade-select"
+                    onchange="updatePlayer(${index}, 'grade', this.value)">
+                ${gradeOptions}
+            </select>
+            <input type="number"
+                   class="value-input"
+                   min="0" max="100"
+                   value="${p.value}"
+                   oninput="this.value = Math.min(100, Math.max(0, +this.value || 0)); updatePlayer(${index}, 'value', +this.value)">
+            <button class="btn-remove" onclick="removePlayer(${index})" title="삭제">✕</button>
+        </div>
     `;
     list.appendChild(row);
 }
