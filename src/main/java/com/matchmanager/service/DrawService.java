@@ -118,11 +118,12 @@ public class DrawService {
             : (size <= 6 ? 2 : 3);
 
         Map<String, Integer> partnerCount = new HashMap<>();
+        int[] gamesPlayed = new int[size];
         List<Game> games = new ArrayList<>();
         List<Integer> waitingIndices = new ArrayList<>();
 
         for (int g = 0; g < gameCount; g++) {
-            Game game = createGame(players, g, partnerCount, waitingIndices, size);
+            Game game = createGame(players, g, partnerCount, waitingIndices, gamesPlayed, size);
             game.setGameNumber(g + 1);
             games.add(game);
         }
@@ -131,22 +132,30 @@ public class DrawService {
 
     private Game createGame(List<Player> players, int gameIndex,
                              Map<String, Integer> partnerCount,
-                             List<Integer> prevWaiting, int size) {
+                             List<Integer> prevWaiting, int[] gamesPlayed, int size) {
         List<Integer> activeIndices = new ArrayList<>();
         List<Integer> newWaiting = new ArrayList<>();
 
         if (gameIndex == 0) {
+            // 급수 범위 전체에서 균등 간격으로 4명 선발 → 상하위 혼합
+            Set<Integer> selected = new LinkedHashSet<>();
+            for (int i = 0; i < 4; i++) {
+                selected.add((int) Math.round((double) i * (size - 1) / 3));
+            }
             for (int i = 0; i < size; i++) {
-                if (i < 4) activeIndices.add(i);
+                if (selected.contains(i)) activeIndices.add(i);
                 else newWaiting.add(i);
             }
         } else {
-            List<Integer> candidates = new ArrayList<>(prevWaiting);
+            // 직전에 쉰 사람은 무조건 출전, 나머지는 "적게 뛴 사람" 우선 (동률은 무작위)으로 채움
             List<Integer> others = new ArrayList<>();
             for (int i = 0; i < size; i++) {
                 if (!prevWaiting.contains(i)) others.add(i);
             }
             Collections.shuffle(others);
+            others.sort(Comparator.comparingInt(i -> gamesPlayed[i]));
+
+            List<Integer> candidates = new ArrayList<>(prevWaiting);
             candidates.addAll(others);
             for (int i = 0; i < size; i++) {
                 if (i < 4) activeIndices.add(candidates.get(i));
@@ -156,6 +165,7 @@ public class DrawService {
 
         prevWaiting.clear();
         prevWaiting.addAll(newWaiting);
+        for (int idx : activeIndices) gamesPlayed[idx]++;
 
         int[] bestSplit = findBestSplit(players, activeIndices, partnerCount);
 
