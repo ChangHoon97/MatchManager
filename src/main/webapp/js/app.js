@@ -1,3 +1,10 @@
+// ========== CSRF ==========
+
+function getCsrfToken() {
+    const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+}
+
 // ========== 유틸 ==========
 
 function escapeHtml(str) {
@@ -177,6 +184,7 @@ function uploadExcel(input) {
 
     fetch('/api/upload-excel', {
         method: 'POST',
+        headers: { 'X-XSRF-TOKEN': getCsrfToken() },
         body: formData
     })
     .then(async res => {
@@ -278,7 +286,7 @@ function generateDraw() {
 
     fetch('/api/draw', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
         body: JSON.stringify({ players: validPlayers, courtCount, gamesPerPlayer })
     })
     .then(async res => {
@@ -507,7 +515,7 @@ function downloadExcel() {
     if (!courtsData || courtsData.length === 0) return;
     fetch('/api/draw/excel', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
         body: JSON.stringify(courtsData)
     })
     .then(res => {
@@ -531,7 +539,136 @@ function downloadExcel() {
     .catch(() => alert('엑셀 다운로드 중 오류가 발생했습니다.'));
 }
 
+// ========== 인증 ==========
+
+let currentUser = null;
+
+function checkAuthState() {
+    fetch('/api/auth/me')
+        .then(res => res.ok ? res.json() : null)
+        .then(user => {
+            currentUser = user;
+            renderAuthWidget();
+        })
+        .catch(() => {
+            currentUser = null;
+            renderAuthWidget();
+        });
+}
+
+function renderAuthWidget() {
+    const el = document.getElementById('authWidget');
+    if (!el) return;
+    if (currentUser) {
+        el.innerHTML = `
+            <span class="auth-nickname">${escapeHtml(currentUser.nickname)}님</span>
+            <button type="button" class="btn btn-auth" onclick="doLogout()">로그아웃</button>
+        `;
+    } else {
+        el.innerHTML = `
+            <button type="button" class="btn btn-auth" onclick="openLoginModal()">로그인</button>
+            <button type="button" class="btn btn-auth" onclick="openSignupModal()">회원가입</button>
+        `;
+    }
+}
+
+function openLoginModal() {
+    hideAuthMsg('loginMsg');
+    document.getElementById('loginModal').classList.remove('hidden');
+}
+
+function closeLoginModal() {
+    document.getElementById('loginModal').classList.add('hidden');
+}
+
+function openSignupModal() {
+    hideAuthMsg('signupMsg');
+    document.getElementById('signupModal').classList.remove('hidden');
+}
+
+function closeSignupModal() {
+    document.getElementById('signupModal').classList.add('hidden');
+}
+
+function switchToSignup() {
+    closeLoginModal();
+    openSignupModal();
+}
+
+function switchToLogin() {
+    closeSignupModal();
+    openLoginModal();
+}
+
+function showAuthMsg(elId, msg) {
+    const el = document.getElementById(elId);
+    el.textContent = msg;
+    el.classList.remove('hidden');
+}
+
+function hideAuthMsg(elId) {
+    const el = document.getElementById(elId);
+    if (el) el.classList.add('hidden');
+}
+
+function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
+        body: JSON.stringify({ email, password })
+    })
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || '로그인에 실패했습니다.');
+        return data;
+    })
+    .then(user => {
+        currentUser = user;
+        renderAuthWidget();
+        closeLoginModal();
+    })
+    .catch(err => showAuthMsg('loginMsg', err.message));
+}
+
+function doSignup() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const nickname = document.getElementById('signupNickname').value.trim();
+    const celno = document.getElementById('signupCelno').value.trim();
+
+    fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
+        body: JSON.stringify({ email, password, nickname, celno })
+    })
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || '회원가입에 실패했습니다.');
+        return data;
+    })
+    .then(() => {
+        closeSignupModal();
+        openLoginModal();
+    })
+    .catch(err => showAuthMsg('signupMsg', err.message));
+}
+
+function doLogout() {
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'X-XSRF-TOKEN': getCsrfToken() }
+    })
+    .finally(() => {
+        currentUser = null;
+        renderAuthWidget();
+    });
+}
+
 // ========== 초기화 ==========
 document.addEventListener('DOMContentLoaded', () => {
     for (let i = 0; i < 4; i++) addPlayer();
+    checkAuthState();
 });

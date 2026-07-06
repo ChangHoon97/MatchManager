@@ -17,6 +17,7 @@
         <div class="header-inner">
             <img src="${pageContext.request.contextPath}/img/title.png"
                  alt="MATCH MANAGER" class="header-title-img">
+            <div id="authWidget" class="auth-widget"></div>
         </div>
         <p class="subtitle">참가자 성함과 급수를 입력하고 대진표를 생성하세요</p>
     </header>
@@ -123,6 +124,42 @@
             <button class="btn btn-print"        onclick="window.print()">🖨️ 인쇄</button>
             <button class="btn btn-regenerate"   onclick="regenerate()">🔄 다시 생성</button>
             <button class="btn btn-close"        onclick="closeModal()">닫기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 로그인 모달 -->
+<div id="loginModal" class="modal hidden">
+    <div class="modal-content modal-content-sm">
+        <div class="modal-header">
+            <h2>로그인</h2>
+            <button class="modal-close" onclick="closeLoginModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="email" id="loginEmail" class="auth-input" placeholder="이메일">
+            <input type="password" id="loginPassword" class="auth-input" placeholder="비밀번호">
+            <div id="loginMsg" class="validation-msg hidden"></div>
+            <button type="button" class="btn btn-generate" onclick="doLogin()">로그인</button>
+            <p class="auth-switch">계정이 없으신가요? <a href="#" onclick="switchToSignup(); return false;">회원가입</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- 회원가입 모달 -->
+<div id="signupModal" class="modal hidden">
+    <div class="modal-content modal-content-sm">
+        <div class="modal-header">
+            <h2>회원가입</h2>
+            <button class="modal-close" onclick="closeSignupModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="email" id="signupEmail" class="auth-input" placeholder="이메일">
+            <input type="password" id="signupPassword" class="auth-input" placeholder="비밀번호 (8자 이상)">
+            <input type="text" id="signupNickname" class="auth-input" placeholder="닉네임" maxlength="20">
+            <input type="text" id="signupCelno" class="auth-input" placeholder="휴대폰번호 (선택)">
+            <div id="signupMsg" class="validation-msg hidden"></div>
+            <button type="button" class="btn btn-generate" onclick="doSignup()">회원가입</button>
+            <p class="auth-switch">이미 계정이 있으신가요? <a href="#" onclick="switchToLogin(); return false;">로그인</a></p>
         </div>
     </div>
 </div>
