@@ -1,2 +1,5 @@
 # 프로젝트 제외 경로
 /target/
+
+# 로컬 시크릿 (DB 접속정보, OAuth 클라이언트 시크릿 등)
+application-local.properties
