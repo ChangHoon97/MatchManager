@@ -636,8 +636,14 @@ function doLogin() {
 function doSignup() {
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
+    const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
     const nickname = document.getElementById('signupNickname').value.trim();
     const celno = document.getElementById('signupCelno').value.trim();
+
+    if (password !== passwordConfirm) {
+        showAuthMsg('signupMsg', '비밀번호가 일치하지 않습니다.');
+        return;
+    }
 
     fetch('/api/auth/signup', {
         method: 'POST',

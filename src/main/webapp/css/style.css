@@ -1142,6 +1142,29 @@ header {
     box-shadow: 0 0 0 3px rgba(30, 114, 114, 0.12);
 }
 
+.btn-google {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    margin-top: 10px;
+    height: 48px;
+    line-height: 48px;
+    background: var(--clr-white);
+    border: 2px solid var(--clr-teal-mid);
+    color: var(--clr-text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-google:hover {
+    background: var(--clr-teal-mid);
+    color: var(--clr-white);
+}
+
 .auth-switch {
     text-align: center;
     font-family: var(--font-body);

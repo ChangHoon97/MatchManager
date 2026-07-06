@@ -1,5 +1,6 @@
 package com.matchmanager.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,7 +17,10 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -30,12 +34,17 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/error", "/WEB-INF/**", "/js/**", "/css/**", "/fonts/**", "/img/**",
                     "/api/draw", "/api/draw/excel", "/api/excel-template", "/api/upload-excel",
-                    "/api/auth/signup", "/api/auth/login", "/api/auth/logout", "/api/auth/me"
+                    "/api/auth/signup", "/api/auth/login", "/api/auth/logout", "/api/auth/me",
+                    "/oauth2/**", "/login/oauth2/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable());
+            .httpBasic(basic -> basic.disable())
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                .defaultSuccessUrl("/", true)
+            );
 
         return http.build();
     }
