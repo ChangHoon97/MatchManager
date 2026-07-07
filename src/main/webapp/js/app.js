@@ -1,3 +1,10 @@
+// ========== CSRF ==========
+
+function getCsrfToken() {
+    const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+}
+
 // ========== 유틸 ==========
 
 function escapeHtml(str) {
@@ -177,6 +184,7 @@ function uploadExcel(input) {
 
     fetch('/api/upload-excel', {
         method: 'POST',
+        headers: { 'X-XSRF-TOKEN': getCsrfToken() },
         body: formData
     })
     .then(async res => {
@@ -278,7 +286,7 @@ function generateDraw() {
 
     fetch('/api/draw', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
         body: JSON.stringify({ players: validPlayers, courtCount, gamesPerPlayer })
     })
     .then(async res => {
@@ -306,10 +314,13 @@ function renderResult(courts, totalPlayers) {
 }
 
 function renderModalContent() {
-    const body = document.getElementById('modalBody');
-    let html = `<p class="subtitle" style="margin-bottom:16px">총 ${totalPlayersCount}명 · ${courtsData.length}개 코트</p>`;
+    renderCourtsInto(document.getElementById('modalBody'), courtsData, totalPlayersCount);
+}
 
-    courtsData.forEach((court, ci) => {
+function renderCourtsInto(container, courts, totalPlayers, options = {}) {
+    let html = `<p class="subtitle" style="margin-bottom:16px">총 ${totalPlayers}명 · ${courts.length}개 코트</p>`;
+
+    courts.forEach((court, ci) => {
         html += `
         <div class="court-section">
             <div class="court-header">
@@ -327,15 +338,15 @@ function renderModalContent() {
                 `).join('')}
             </div>
             <div class="games-grid">
-                ${court.games.map((game, gi) => renderGameCard(game, ci, gi)).join('')}
+                ${court.games.map((game, gi) => renderGameCard(game, ci, gi, options)).join('')}
             </div>
         </div>`;
     });
 
-    body.innerHTML = html;
+    container.innerHTML = html;
 }
 
-function renderGameCard(game, ci, gi) {
+function renderGameCard(game, ci, gi, options = {}) {
     const tA = totalScore(game.teamA1) + totalScore(game.teamA2);
     const tB = totalScore(game.teamB1) + totalScore(game.teamB2);
     const diff = Math.abs(tA - tB);
@@ -353,19 +364,43 @@ function renderGameCard(game, ci, gi) {
         </div>
         <div class="match-area">
             <div class="team team-a">
-                <div class="team-label">A팀</div>
+                <div class="team-label">A팀 ${renderTeamScore(game, 'team1Score', ci, gi, options)}</div>
                 ${renderSlot(game.teamA1, ci, gi, 'teamA1', 'team-a')}
                 ${renderSlot(game.teamA2, ci, gi, 'teamA2', 'team-a')}
             </div>
             <div class="vs-badge">VS</div>
             <div class="team team-b">
-                <div class="team-label">B팀</div>
+                <div class="team-label">B팀 ${renderTeamScore(game, 'team2Score', ci, gi, options)}</div>
                 ${renderSlot(game.teamB1, ci, gi, 'teamB1', 'team-b')}
                 ${renderSlot(game.teamB2, ci, gi, 'teamB2', 'team-b')}
             </div>
         </div>
         ${renderWaiting(game, ci, gi)}
     </div>`;
+}
+
+function renderTeamScore(game, field, ci, gi, options = {}) {
+    if (options.scoreMode === 'edit' && game.matchId) {
+        const value = game[field] ?? '';
+        const label = field === 'team1Score' ? 'A팀 점수' : 'B팀 점수';
+        return `<input type="text"
+                       class="score-input"
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       maxlength="2"
+                       value="${value}"
+                       aria-label="${label}"
+                       data-ci="${ci}"
+                       data-gi="${gi}"
+                       data-score-field="${field}"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2)">`;
+    }
+
+    if (game[field] !== null && game[field] !== undefined) {
+        return `<span class="team-score">${game[field]}</span>`;
+    }
+
+    return '';
 }
 
 function renderSlot(player, ci, gi, role, teamClass) {
@@ -507,7 +542,7 @@ function downloadExcel() {
     if (!courtsData || courtsData.length === 0) return;
     fetch('/api/draw/excel', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
         body: JSON.stringify(courtsData)
     })
     .then(res => {
@@ -531,7 +566,194 @@ function downloadExcel() {
     .catch(() => alert('엑셀 다운로드 중 오류가 발생했습니다.'));
 }
 
+// ========== 대진표 저장 ==========
+
+function openSaveModal() {
+    if (!currentUser) {
+        alert('저장하려면 먼저 로그인해주세요.');
+        openLoginModal();
+        return;
+    }
+    document.getElementById('saveTitle').value = '';
+    hideAuthMsg('saveMsg');
+    document.getElementById('saveModal').classList.remove('hidden');
+}
+
+function closeSaveModal() {
+    document.getElementById('saveModal').classList.add('hidden');
+}
+
+function doSaveDraw() {
+    const title = document.getElementById('saveTitle').value.trim();
+    if (!title) {
+        showAuthMsg('saveMsg', '제목을 입력해주세요.');
+        return;
+    }
+
+    fetch('/api/draws', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
+        body: JSON.stringify({
+            title,
+            content: courtsData,
+            courtCount,
+            gamesPerPlayer
+        })
+    })
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || '저장에 실패했습니다.');
+        return data;
+    })
+    .then(() => {
+        closeSaveModal();
+        alert('저장되었습니다. "내 대진표"에서 확인할 수 있습니다.');
+    })
+    .catch(err => showAuthMsg('saveMsg', err.message));
+}
+
+// ========== 인증 ==========
+
+let currentUser = null;
+
+function checkAuthState() {
+    fetch('/api/auth/me')
+        .then(res => res.ok ? res.json() : null)
+        .then(user => {
+            currentUser = user;
+            renderAuthWidget();
+        })
+        .catch(() => {
+            currentUser = null;
+            renderAuthWidget();
+        });
+}
+
+function renderAuthWidget() {
+    const el = document.getElementById('authWidget');
+    if (!el) return;
+    if (currentUser) {
+        el.innerHTML = `
+            <span class="auth-nickname">${escapeHtml(currentUser.nickname)}님</span>
+            <a href="${window.location.origin}/my-draws" class="btn btn-auth">내 대진표</a>
+            <button type="button" class="btn btn-auth" onclick="doLogout()">로그아웃</button>
+        `;
+    } else {
+        el.innerHTML = `
+            <button type="button" class="btn btn-auth" onclick="openLoginModal()">로그인</button>
+            <button type="button" class="btn btn-auth" onclick="openSignupModal()">회원가입</button>
+        `;
+    }
+}
+
+function openLoginModal() {
+    hideAuthMsg('loginMsg');
+    document.getElementById('loginModal').classList.remove('hidden');
+}
+
+function closeLoginModal() {
+    document.getElementById('loginModal').classList.add('hidden');
+}
+
+function openSignupModal() {
+    hideAuthMsg('signupMsg');
+    document.getElementById('signupModal').classList.remove('hidden');
+}
+
+function closeSignupModal() {
+    document.getElementById('signupModal').classList.add('hidden');
+}
+
+function switchToSignup() {
+    closeLoginModal();
+    openSignupModal();
+}
+
+function switchToLogin() {
+    closeSignupModal();
+    openLoginModal();
+}
+
+function showAuthMsg(elId, msg) {
+    const el = document.getElementById(elId);
+    el.textContent = msg;
+    el.classList.remove('hidden');
+}
+
+function hideAuthMsg(elId) {
+    const el = document.getElementById(elId);
+    if (el) el.classList.add('hidden');
+}
+
+function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
+        body: JSON.stringify({ email, password })
+    })
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || '로그인에 실패했습니다.');
+        return data;
+    })
+    .then(user => {
+        currentUser = user;
+        renderAuthWidget();
+        closeLoginModal();
+    })
+    .catch(err => showAuthMsg('loginMsg', err.message));
+}
+
+function doSignup() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+    const nickname = document.getElementById('signupNickname').value.trim();
+    const celno = document.getElementById('signupCelno').value.trim();
+
+    if (password !== passwordConfirm) {
+        showAuthMsg('signupMsg', '비밀번호가 일치하지 않습니다.');
+        return;
+    }
+
+    fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
+        body: JSON.stringify({ email, password, nickname, celno })
+    })
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || '회원가입에 실패했습니다.');
+        return data;
+    })
+    .then(() => {
+        closeSignupModal();
+        openLoginModal();
+    })
+    .catch(err => showAuthMsg('signupMsg', err.message));
+}
+
+function doLogout() {
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'X-XSRF-TOKEN': getCsrfToken() }
+    })
+    .finally(() => {
+        currentUser = null;
+        renderAuthWidget();
+        if (window.location.pathname !== '/') {
+            window.location.href = '/';
+        }
+    });
+}
+
 // ========== 초기화 ==========
 document.addEventListener('DOMContentLoaded', () => {
-    for (let i = 0; i < 4; i++) addPlayer();
+    if (document.getElementById('playerList')) {
+        for (let i = 0; i < 4; i++) addPlayer();
+    }
+    checkAuthState();
 });

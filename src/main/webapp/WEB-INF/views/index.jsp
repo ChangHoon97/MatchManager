@@ -14,6 +14,12 @@
 <body>
 <div class="container">
     <header>
+        <div class="top-nav">
+            <div class="nav-left">
+                <button type="button" class="nav-icon-btn" onclick="location.href='${pageContext.request.contextPath}/'" title="홈">🏠</button>
+            </div>
+            <div id="authWidget" class="auth-widget"></div>
+        </div>
         <div class="header-inner">
             <img src="${pageContext.request.contextPath}/img/title.png"
                  alt="MATCH MANAGER" class="header-title-img">
@@ -119,10 +125,65 @@
             <!-- 결과가 여기에 출력됨 -->
         </div>
         <div class="modal-footer">
+            <button class="btn btn-save-draw"    onclick="openSaveModal()">💾 저장</button>
             <button class="btn btn-excel-result" onclick="downloadExcel()">📊 엑셀 다운로드</button>
             <button class="btn btn-print"        onclick="window.print()">🖨️ 인쇄</button>
             <button class="btn btn-regenerate"   onclick="regenerate()">🔄 다시 생성</button>
             <button class="btn btn-close"        onclick="closeModal()">닫기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 저장 모달 -->
+<div id="saveModal" class="modal hidden">
+    <div class="modal-content modal-content-sm">
+        <div class="modal-header">
+            <h2>대진표 저장</h2>
+            <button class="modal-close" onclick="closeSaveModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="saveTitle" class="auth-input" placeholder="제목 (예: 7/6 번개모임)" maxlength="200">
+            <div id="saveMsg" class="validation-msg hidden"></div>
+            <button type="button" class="btn btn-generate" onclick="doSaveDraw()">저장하기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 로그인 모달 -->
+<div id="loginModal" class="modal hidden">
+    <div class="modal-content modal-content-sm">
+        <div class="modal-header">
+            <h2>로그인</h2>
+            <button class="modal-close" onclick="closeLoginModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="email" id="loginEmail" class="auth-input" placeholder="이메일">
+            <input type="password" id="loginPassword" class="auth-input" placeholder="비밀번호">
+            <div id="loginMsg" class="validation-msg hidden"></div>
+            <button type="button" class="btn btn-generate" onclick="doLogin()">로그인</button>
+            <a href="${pageContext.request.contextPath}/oauth2/authorization/google" class="btn btn-google">Google로 로그인</a>
+            <p class="auth-switch">계정이 없으신가요? <a href="#" onclick="switchToSignup(); return false;">회원가입</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- 회원가입 모달 -->
+<div id="signupModal" class="modal hidden">
+    <div class="modal-content modal-content-sm">
+        <div class="modal-header">
+            <h2>회원가입</h2>
+            <button class="modal-close" onclick="closeSignupModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="email" id="signupEmail" class="auth-input" placeholder="이메일">
+            <input type="password" id="signupPassword" class="auth-input" placeholder="비밀번호 (8자 이상)">
+            <input type="password" id="signupPasswordConfirm" class="auth-input" placeholder="비밀번호 확인">
+            <input type="text" id="signupNickname" class="auth-input" placeholder="닉네임" maxlength="20">
+            <input type="text" id="signupCelno" class="auth-input" placeholder="휴대폰번호 (선택)">
+            <div id="signupMsg" class="validation-msg hidden"></div>
+            <button type="button" class="btn btn-generate" onclick="doSignup()">회원가입</button>
+            <a href="${pageContext.request.contextPath}/oauth2/authorization/google" class="btn btn-google">Google로 회원가입</a>
+            <p class="auth-switch">이미 계정이 있으신가요? <a href="#" onclick="switchToLogin(); return false;">로그인</a></p>
         </div>
     </div>
 </div>
