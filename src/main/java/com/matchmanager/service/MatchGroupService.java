@@ -18,6 +18,8 @@ import com.matchmanager.repository.MatchRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -144,7 +146,7 @@ public class MatchGroupService {
         }
 
         matchRepository.saveAll(updatedMatches);
-        notifyScoresUpdated(group);
+        notifyScoresUpdatedAfterCommit(group.getShareToken(), group.getId());
     }
 
     @Transactional
@@ -230,17 +232,30 @@ public class MatchGroupService {
         return "share_unlocked_" + token;
     }
 
-    private void notifyScoresUpdated(MatchGroup group) {
-        if (group.getShareToken() == null) return;
+    private void notifyScoresUpdatedAfterCommit(String shareToken, Long groupId) {
+        if (shareToken == null) return;
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            notifyScoresUpdated(shareToken, groupId);
+            return;
+        }
 
-        List<SseEmitter> emitters = shareEmitters.getOrDefault(group.getShareToken(), new CopyOnWriteArrayList<>());
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                notifyScoresUpdated(shareToken, groupId);
+            }
+        });
+    }
+
+    private void notifyScoresUpdated(String shareToken, Long groupId) {
+        List<SseEmitter> emitters = shareEmitters.getOrDefault(shareToken, new CopyOnWriteArrayList<>());
         for (SseEmitter emitter : emitters) {
             try {
                 emitter.send(SseEmitter.event()
                         .name("scores-updated")
-                        .data(Map.of("matchGroupId", group.getId())));
+                        .data(Map.of("matchGroupId", groupId)));
             } catch (IOException | IllegalStateException e) {
-                removeShareEmitter(group.getShareToken(), emitter);
+                removeShareEmitter(shareToken, emitter);
             }
         }
     }

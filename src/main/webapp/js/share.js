@@ -52,13 +52,12 @@ function refreshUnlockedShareView() {
 }
 
 function connectShareEvents() {
-    if (shareEventSource) return;
+    if (shareEventSource && shareEventSource.readyState !== EventSource.CLOSED) return;
+    shareEventSource = null;
 
     shareEventSource = new EventSource(`/api/share/${getShareToken()}/events`);
     shareEventSource.addEventListener('scores-updated', refreshUnlockedShareView);
-    shareEventSource.onerror = () => {
-        disconnectShareEvents();
-    };
+    shareEventSource.onerror = () => {};
 }
 
 function disconnectShareEvents() {
