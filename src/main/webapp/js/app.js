@@ -314,10 +314,13 @@ function renderResult(courts, totalPlayers) {
 }
 
 function renderModalContent() {
-    const body = document.getElementById('modalBody');
-    let html = `<p class="subtitle" style="margin-bottom:16px">총 ${totalPlayersCount}명 · ${courtsData.length}개 코트</p>`;
+    renderCourtsInto(document.getElementById('modalBody'), courtsData, totalPlayersCount);
+}
 
-    courtsData.forEach((court, ci) => {
+function renderCourtsInto(container, courts, totalPlayers) {
+    let html = `<p class="subtitle" style="margin-bottom:16px">총 ${totalPlayers}명 · ${courts.length}개 코트</p>`;
+
+    courts.forEach((court, ci) => {
         html += `
         <div class="court-section">
             <div class="court-header">
@@ -340,7 +343,7 @@ function renderModalContent() {
         </div>`;
     });
 
-    body.innerHTML = html;
+    container.innerHTML = html;
 }
 
 function renderGameCard(game, ci, gi) {
@@ -539,6 +542,52 @@ function downloadExcel() {
     .catch(() => alert('엑셀 다운로드 중 오류가 발생했습니다.'));
 }
 
+// ========== 대진표 저장 ==========
+
+function openSaveModal() {
+    if (!currentUser) {
+        alert('저장하려면 먼저 로그인해주세요.');
+        openLoginModal();
+        return;
+    }
+    document.getElementById('saveTitle').value = '';
+    hideAuthMsg('saveMsg');
+    document.getElementById('saveModal').classList.remove('hidden');
+}
+
+function closeSaveModal() {
+    document.getElementById('saveModal').classList.add('hidden');
+}
+
+function doSaveDraw() {
+    const title = document.getElementById('saveTitle').value.trim();
+    if (!title) {
+        showAuthMsg('saveMsg', '제목을 입력해주세요.');
+        return;
+    }
+
+    fetch('/api/draws', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
+        body: JSON.stringify({
+            title,
+            content: courtsData,
+            courtCount,
+            gamesPerPlayer
+        })
+    })
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || '저장에 실패했습니다.');
+        return data;
+    })
+    .then(() => {
+        closeSaveModal();
+        alert('저장되었습니다. "내 대진표"에서 확인할 수 있습니다.');
+    })
+    .catch(err => showAuthMsg('saveMsg', err.message));
+}
+
 // ========== 인증 ==========
 
 let currentUser = null;
@@ -562,6 +611,7 @@ function renderAuthWidget() {
     if (currentUser) {
         el.innerHTML = `
             <span class="auth-nickname">${escapeHtml(currentUser.nickname)}님</span>
+            <a href="${window.location.origin}/my-draws" class="btn btn-auth">내 대진표</a>
             <button type="button" class="btn btn-auth" onclick="doLogout()">로그아웃</button>
         `;
     } else {
@@ -675,6 +725,8 @@ function doLogout() {
 
 // ========== 초기화 ==========
 document.addEventListener('DOMContentLoaded', () => {
-    for (let i = 0; i < 4; i++) addPlayer();
+    if (document.getElementById('playerList')) {
+        for (let i = 0; i < 4; i++) addPlayer();
+    }
     checkAuthState();
 });

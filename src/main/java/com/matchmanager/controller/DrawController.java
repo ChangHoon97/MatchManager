@@ -35,6 +35,11 @@ public class DrawController {
         return "index";
     }
 
+    @GetMapping("/my-draws")
+    public String myDraws() {
+        return "myDraws";
+    }
+
     @PostMapping("/api/draw")
     @ResponseBody
     public List<Court> generateDrawApi(@Valid @RequestBody DrawRequestDto request) {

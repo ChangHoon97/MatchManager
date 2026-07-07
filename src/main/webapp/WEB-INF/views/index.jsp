@@ -120,10 +120,26 @@
             <!-- 결과가 여기에 출력됨 -->
         </div>
         <div class="modal-footer">
+            <button class="btn btn-save-draw"    onclick="openSaveModal()">💾 저장</button>
             <button class="btn btn-excel-result" onclick="downloadExcel()">📊 엑셀 다운로드</button>
             <button class="btn btn-print"        onclick="window.print()">🖨️ 인쇄</button>
             <button class="btn btn-regenerate"   onclick="regenerate()">🔄 다시 생성</button>
             <button class="btn btn-close"        onclick="closeModal()">닫기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 저장 모달 -->
+<div id="saveModal" class="modal hidden">
+    <div class="modal-content modal-content-sm">
+        <div class="modal-header">
+            <h2>대진표 저장</h2>
+            <button class="modal-close" onclick="closeSaveModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="saveTitle" class="auth-input" placeholder="제목 (예: 7/6 번개모임)" maxlength="200">
+            <div id="saveMsg" class="validation-msg hidden"></div>
+            <button type="button" class="btn btn-generate" onclick="doSaveDraw()">저장하기</button>
         </div>
     </div>
 </div>

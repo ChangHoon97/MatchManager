@@ -909,6 +909,7 @@ header {
 }
 
 /* ===== 모달 푸터 버튼 ===== */
+.btn-save-draw,
 .btn-excel-result,
 .btn-print,
 .btn-regenerate,
@@ -923,6 +924,7 @@ header {
     transition: background 0.15s, color 0.15s;
 }
 
+.btn-save-draw:hover,
 .btn-excel-result:hover,
 .btn-print:hover,
 .btn-regenerate:hover {
@@ -1006,6 +1008,7 @@ header {
     .modal-header { padding: 16px 18px; }
     .modal-header h2 { font-size: 22px; }
     .modal-footer { padding: 12px 14px; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .btn-save-draw,
     .btn-print,
     .btn-regenerate,
     .btn-close    { font-size: 13px; padding: 8px 14px; }
@@ -1185,6 +1188,52 @@ header {
         justify-content: center;
         margin-top: 10px;
     }
+}
+
+/* ===== 내 대진표 목록 ===== */
+.draw-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.draw-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--clr-white);
+    border: 1.5px solid var(--clr-teal-pale);
+    border-radius: var(--radius-card);
+    padding: 16px 20px;
+    box-shadow: var(--shadow-card);
+}
+
+.draw-card-info {
+    cursor: pointer;
+    flex: 1;
+}
+
+.draw-card-info h3 {
+    font-family: var(--font-body);
+    font-size: 17px;
+    color: var(--clr-teal);
+    margin-bottom: 4px;
+}
+
+.draw-card-meta {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--clr-text);
+}
+
+.draw-share-badge {
+    display: inline-block;
+    margin-left: 8px;
+    background: var(--clr-teal);
+    color: var(--clr-white);
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: var(--radius-pill);
 }
 
 /* ===== 인쇄 ===== */
