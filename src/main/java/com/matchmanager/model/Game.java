@@ -1,13 +1,13 @@
 package com.matchmanager.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Game {
+
+    private Long matchId;
 
     private int gameNumber;
 
@@ -19,6 +19,20 @@ public class Game {
 
     private Player waiting1;
     private Player waiting2;
+
+    private Integer team1Score;
+    private Integer team2Score;
+
+    public Game(int gameNumber, Player teamA1, Player teamA2, Player teamB1, Player teamB2,
+                Player waiting1, Player waiting2) {
+        this.gameNumber = gameNumber;
+        this.teamA1 = teamA1;
+        this.teamA2 = teamA2;
+        this.teamB1 = teamB1;
+        this.teamB2 = teamB2;
+        this.waiting1 = waiting1;
+        this.waiting2 = waiting2;
+    }
 
     public String getTeamADisplay() {
         return teamA1.getName() + " / " + teamA2.getName();

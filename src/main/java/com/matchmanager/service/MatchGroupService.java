@@ -3,20 +3,26 @@ package com.matchmanager.service;
 import com.matchmanager.dto.DrawDetailDto;
 import com.matchmanager.dto.DrawSummaryDto;
 import com.matchmanager.dto.SaveDrawRequestDto;
+import com.matchmanager.dto.ScoreUpdateRequestDto;
+import com.matchmanager.dto.ShareViewDto;
 import com.matchmanager.entity.Match;
 import com.matchmanager.entity.MatchGroup;
 import com.matchmanager.exception.ForbiddenException;
 import com.matchmanager.exception.NotFoundException;
+import com.matchmanager.exception.UnauthorizedException;
 import com.matchmanager.model.Court;
 import com.matchmanager.model.Game;
 import com.matchmanager.model.Player;
 import com.matchmanager.repository.MatchGroupRepository;
 import com.matchmanager.repository.MatchRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,6 +34,7 @@ import java.util.stream.Collectors;
 public class MatchGroupService {
 
     private static final String NOT_DELETED = "N";
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final MatchGroupRepository matchGroupRepository;
     private final MatchRepository matchRepository;
@@ -106,6 +113,100 @@ public class MatchGroupService {
         matchGroupRepository.save(group);
     }
 
+    @Transactional
+    public void updateScores(Long groupId, Long userId, List<ScoreUpdateRequestDto> scores) {
+        MatchGroup group = matchGroupRepository.findByIdAndDelYn(groupId, NOT_DELETED)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 대진표입니다."));
+        if (!group.getRegId().equals(userId)) {
+            throw new ForbiddenException("본인이 저장한 대진표의 점수만 수정할 수 있습니다.");
+        }
+
+        List<Match> matches = matchRepository.findByMatchGroupIdAndDelYnOrderByCourtNoAscRoundNoAsc(groupId, NOT_DELETED);
+        Map<Long, Match> byId = matches.stream()
+                .collect(Collectors.toMap(Match::getId, m -> m));
+
+        List<Match> updatedMatches = new ArrayList<>();
+        for (ScoreUpdateRequestDto score : scores) {
+            Match match = byId.get(score.getMatchId());
+            if (match == null) {
+                throw new NotFoundException("해당 대진표에 포함되지 않은 경기입니다.");
+            }
+            match.setTeam1Score(score.getTeam1Score());
+            match.setTeam2Score(score.getTeam2Score());
+            match.setModId(userId);
+            updatedMatches.add(match);
+        }
+
+        matchRepository.saveAll(updatedMatches);
+    }
+
+    @Transactional
+    public String createShare(Long groupId, Long userId, String rawPassword) {
+        MatchGroup group = matchGroupRepository.findByIdAndDelYn(groupId, NOT_DELETED)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 대진표입니다."));
+        if (!group.getRegId().equals(userId)) {
+            throw new ForbiddenException("본인이 저장한 대진표만 공유할 수 있습니다.");
+        }
+
+        String token = group.getShareToken() != null ? group.getShareToken() : generateShareToken();
+        group.setShareToken(token);
+        group.setPassword(rawPassword);
+        matchGroupRepository.save(group);
+        return token;
+    }
+
+    public Map<String, Object> getShareInfo(Long groupId, Long userId) {
+        MatchGroup group = matchGroupRepository.findByIdAndDelYn(groupId, NOT_DELETED)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 대진표입니다."));
+        if (!group.getRegId().equals(userId)) {
+            throw new ForbiddenException("본인이 저장한 대진표만 조회할 수 있습니다.");
+        }
+        if (group.getShareToken() == null) {
+            throw new NotFoundException("아직 공유되지 않은 대진표입니다.");
+        }
+        return Map.of(
+                "token", group.getShareToken(),
+                "shareUrl", "/share/" + group.getShareToken(),
+                "password", group.getPassword()
+        );
+    }
+
+    public ShareViewDto getShareView(String token, HttpSession session) {
+        MatchGroup group = matchGroupRepository.findByShareTokenAndDelYn(token, NOT_DELETED)
+                .orElseThrow(() -> new NotFoundException("존재하지 않거나 만료된 링크입니다."));
+
+        boolean unlocked = Boolean.TRUE.equals(session.getAttribute(shareSessionKey(token)));
+        List<Court> content = unlocked ? reconstructCourts(group.getId()) : null;
+        return new ShareViewDto(group.getTitle(), true, unlocked,
+                unlocked ? group.getTotalPlayers() : 0,
+                unlocked ? group.getCourtCount() : 0,
+                content);
+    }
+
+    public ShareViewDto unlockShare(String token, String rawPassword, HttpSession session) {
+        MatchGroup group = matchGroupRepository.findByShareTokenAndDelYn(token, NOT_DELETED)
+                .orElseThrow(() -> new NotFoundException("존재하지 않거나 만료된 링크입니다."));
+
+        if (group.getPassword() == null || !group.getPassword().equals(rawPassword)) {
+            throw new UnauthorizedException("비밀번호가 올바르지 않습니다.");
+        }
+
+        session.setAttribute(shareSessionKey(token), Boolean.TRUE);
+        List<Court> content = reconstructCourts(group.getId());
+        return new ShareViewDto(group.getTitle(), true, true,
+                group.getTotalPlayers(), group.getCourtCount(), content);
+    }
+
+    private String shareSessionKey(String token) {
+        return "share_unlocked_" + token;
+    }
+
+    private String generateShareToken() {
+        byte[] bytes = new byte[32];
+        SECURE_RANDOM.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
     private void fillPlayer(Match match, int slot, Player player) {
         switch (slot) {
             case 1 -> {
@@ -156,6 +257,9 @@ public class MatchGroupService {
                 Player p4 = toPlayer(m.getPlayer4Name(), m.getPlayer4Grade(), m.getPlayer4Gender(), m.getPlayer4Age());
 
                 Game game = new Game(m.getRoundNo(), p1, p2, p3, p4, null, null);
+                game.setMatchId(m.getId());
+                game.setTeam1Score(m.getTeam1Score());
+                game.setTeam2Score(m.getTeam2Score());
                 games.add(game);
                 playersInCourt.add(p1);
                 playersInCourt.add(p2);

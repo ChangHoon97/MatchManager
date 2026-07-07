@@ -14,10 +14,15 @@
 <body>
 <div class="container">
     <header>
+        <div class="top-nav">
+            <div class="nav-left">
+                <button type="button" class="nav-icon-btn" onclick="location.href='${pageContext.request.contextPath}/'" title="홈">🏠</button>
+            </div>
+            <div id="authWidget" class="auth-widget"></div>
+        </div>
         <div class="header-inner">
             <img src="${pageContext.request.contextPath}/img/title.png"
                  alt="MATCH MANAGER" class="header-title-img">
-            <div id="authWidget" class="auth-widget"></div>
         </div>
         <p class="subtitle">참가자 성함과 급수를 입력하고 대진표를 생성하세요</p>
     </header>

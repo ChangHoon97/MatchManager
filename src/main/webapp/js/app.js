@@ -317,7 +317,7 @@ function renderModalContent() {
     renderCourtsInto(document.getElementById('modalBody'), courtsData, totalPlayersCount);
 }
 
-function renderCourtsInto(container, courts, totalPlayers) {
+function renderCourtsInto(container, courts, totalPlayers, options = {}) {
     let html = `<p class="subtitle" style="margin-bottom:16px">총 ${totalPlayers}명 · ${courts.length}개 코트</p>`;
 
     courts.forEach((court, ci) => {
@@ -338,7 +338,7 @@ function renderCourtsInto(container, courts, totalPlayers) {
                 `).join('')}
             </div>
             <div class="games-grid">
-                ${court.games.map((game, gi) => renderGameCard(game, ci, gi)).join('')}
+                ${court.games.map((game, gi) => renderGameCard(game, ci, gi, options)).join('')}
             </div>
         </div>`;
     });
@@ -346,7 +346,7 @@ function renderCourtsInto(container, courts, totalPlayers) {
     container.innerHTML = html;
 }
 
-function renderGameCard(game, ci, gi) {
+function renderGameCard(game, ci, gi, options = {}) {
     const tA = totalScore(game.teamA1) + totalScore(game.teamA2);
     const tB = totalScore(game.teamB1) + totalScore(game.teamB2);
     const diff = Math.abs(tA - tB);
@@ -364,19 +364,43 @@ function renderGameCard(game, ci, gi) {
         </div>
         <div class="match-area">
             <div class="team team-a">
-                <div class="team-label">A팀</div>
+                <div class="team-label">A팀 ${renderTeamScore(game, 'team1Score', ci, gi, options)}</div>
                 ${renderSlot(game.teamA1, ci, gi, 'teamA1', 'team-a')}
                 ${renderSlot(game.teamA2, ci, gi, 'teamA2', 'team-a')}
             </div>
             <div class="vs-badge">VS</div>
             <div class="team team-b">
-                <div class="team-label">B팀</div>
+                <div class="team-label">B팀 ${renderTeamScore(game, 'team2Score', ci, gi, options)}</div>
                 ${renderSlot(game.teamB1, ci, gi, 'teamB1', 'team-b')}
                 ${renderSlot(game.teamB2, ci, gi, 'teamB2', 'team-b')}
             </div>
         </div>
         ${renderWaiting(game, ci, gi)}
     </div>`;
+}
+
+function renderTeamScore(game, field, ci, gi, options = {}) {
+    if (options.scoreMode === 'edit' && game.matchId) {
+        const value = game[field] ?? '';
+        const label = field === 'team1Score' ? 'A팀 점수' : 'B팀 점수';
+        return `<input type="text"
+                       class="score-input"
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       maxlength="2"
+                       value="${value}"
+                       aria-label="${label}"
+                       data-ci="${ci}"
+                       data-gi="${gi}"
+                       data-score-field="${field}"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2)">`;
+    }
+
+    if (game[field] !== null && game[field] !== undefined) {
+        return `<span class="team-score">${game[field]}</span>`;
+    }
+
+    return '';
 }
 
 function renderSlot(player, ci, gi, role, teamClass) {
@@ -720,6 +744,9 @@ function doLogout() {
     .finally(() => {
         currentUser = null;
         renderAuthWidget();
+        if (window.location.pathname !== '/') {
+            window.location.href = '/';
+        }
     });
 }
 

@@ -32,9 +32,10 @@ public class SecurityConfig {
             .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/", "/my-draws", "/error", "/WEB-INF/**", "/js/**", "/css/**", "/fonts/**", "/img/**",
+                    "/", "/my-draws", "/share/**", "/error", "/WEB-INF/**", "/js/**", "/css/**", "/fonts/**", "/img/**",
                     "/api/draw", "/api/draw/excel", "/api/excel-template", "/api/upload-excel",
                     "/api/auth/signup", "/api/auth/login", "/api/auth/logout", "/api/auth/me",
+                    "/api/share/**",
                     "/oauth2/**", "/login/oauth2/**"
                 ).permitAll()
                 .anyRequest().authenticated()
