@@ -1,5 +1,7 @@
 // ========== 공유 대진표 열람 ==========
 
+let shareEventSource = null;
+
 function getShareToken() {
     return document.getElementById('shareToken').value;
 }
@@ -24,9 +26,45 @@ function applyShareView(view) {
         document.getElementById('unlockSection').classList.add('hidden');
         courtsData = view.content;
         renderCourtsInto(document.getElementById('shareContentBody'), courtsData, view.totalPlayers);
+        connectShareEvents();
     } else {
+        disconnectShareEvents();
         document.getElementById('unlockSection').classList.remove('hidden');
     }
+}
+
+function refreshUnlockedShareView() {
+    fetch(`/api/share/${getShareToken()}`)
+        .then(async res => {
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.message || '대진표를 갱신하지 못했습니다.');
+            return data;
+        })
+        .then(view => {
+            if (!view.unlocked) {
+                applyShareView(view);
+                return;
+            }
+            courtsData = view.content;
+            renderCourtsInto(document.getElementById('shareContentBody'), courtsData, view.totalPlayers);
+        })
+        .catch(() => disconnectShareEvents());
+}
+
+function connectShareEvents() {
+    if (shareEventSource) return;
+
+    shareEventSource = new EventSource(`/api/share/${getShareToken()}/events`);
+    shareEventSource.addEventListener('scores-updated', refreshUnlockedShareView);
+    shareEventSource.onerror = () => {
+        disconnectShareEvents();
+    };
+}
+
+function disconnectShareEvents() {
+    if (!shareEventSource) return;
+    shareEventSource.close();
+    shareEventSource = null;
 }
 
 function doUnlock() {
@@ -47,3 +85,4 @@ function doUnlock() {
 }
 
 document.addEventListener('DOMContentLoaded', loadShareView);
+window.addEventListener('beforeunload', disconnectShareEvents);

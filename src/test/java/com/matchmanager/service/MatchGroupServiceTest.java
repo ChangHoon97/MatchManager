@@ -86,6 +86,35 @@ class MatchGroupServiceTest {
     }
 
     @Test
+    void subscribeShareEventsRequiresUnlockedSession() {
+        MatchGroup group = sharedGroup();
+        HttpSession session = mock(HttpSession.class);
+        when(matchGroupRepository.findByShareTokenAndDelYn("token123", "N")).thenReturn(Optional.of(group));
+
+        assertThatThrownBy(() -> service.subscribeShareEvents("token123", session))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("비밀번호 확인 후 실시간 갱신을 사용할 수 있습니다.");
+    }
+
+    @Test
+    void updateScoresWithUnlockedShareSubscriberCompletes() {
+        MatchGroup group = sharedGroup();
+        Match match = match(10L);
+        HttpSession session = mock(HttpSession.class);
+        when(session.getAttribute("share_unlocked_token123")).thenReturn(Boolean.TRUE);
+        when(matchGroupRepository.findByShareTokenAndDelYn("token123", "N")).thenReturn(Optional.of(group));
+        when(matchGroupRepository.findByIdAndDelYn(1L, "N")).thenReturn(Optional.of(group));
+        when(matchRepository.findByMatchGroupIdAndDelYnOrderByCourtNoAscRoundNoAsc(1L, "N"))
+                .thenReturn(List.of(match));
+
+        service.subscribeShareEvents("token123", session);
+        service.updateScores(1L, 7L, List.of(score(10L, 21, 18)));
+
+        assertThat(match.getTeam1Score()).isEqualTo(21);
+        assertThat(match.getTeam2Score()).isEqualTo(18);
+    }
+
+    @Test
     void detailIncludesMatchIdAndScores() {
         MatchGroup group = sharedGroup();
         Match match = match(10L);

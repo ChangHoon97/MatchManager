@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/api/share")
@@ -19,6 +20,11 @@ public class ShareController {
     @GetMapping("/{token}")
     public ResponseEntity<ShareViewDto> view(@PathVariable String token, HttpSession session) {
         return ResponseEntity.ok(matchGroupService.getShareView(token, session));
+    }
+
+    @GetMapping("/{token}/events")
+    public SseEmitter events(@PathVariable String token, HttpSession session) {
+        return matchGroupService.subscribeShareEvents(token, session);
     }
 
     @PostMapping("/{token}/unlock")

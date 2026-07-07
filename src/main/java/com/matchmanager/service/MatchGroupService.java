@@ -19,7 +19,9 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -27,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,9 +39,11 @@ public class MatchGroupService {
 
     private static final String NOT_DELETED = "N";
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final long SSE_TIMEOUT_MS = 30L * 60L * 1000L;
 
     private final MatchGroupRepository matchGroupRepository;
     private final MatchRepository matchRepository;
+    private final Map<String, CopyOnWriteArrayList<SseEmitter>> shareEmitters = new ConcurrentHashMap<>();
 
     @Transactional
     public Long saveDraw(Long userId, SaveDrawRequestDto req) {
@@ -138,6 +144,7 @@ public class MatchGroupService {
         }
 
         matchRepository.saveAll(updatedMatches);
+        notifyScoresUpdated(group);
     }
 
     @Transactional
@@ -197,8 +204,54 @@ public class MatchGroupService {
                 group.getTotalPlayers(), group.getCourtCount(), content);
     }
 
+    public SseEmitter subscribeShareEvents(String token, HttpSession session) {
+        matchGroupRepository.findByShareTokenAndDelYn(token, NOT_DELETED)
+                .orElseThrow(() -> new NotFoundException("존재하지 않거나 만료된 링크입니다."));
+        if (!Boolean.TRUE.equals(session.getAttribute(shareSessionKey(token)))) {
+            throw new UnauthorizedException("비밀번호 확인 후 실시간 갱신을 사용할 수 있습니다.");
+        }
+
+        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
+        shareEmitters.computeIfAbsent(token, key -> new CopyOnWriteArrayList<>()).add(emitter);
+        emitter.onCompletion(() -> removeShareEmitter(token, emitter));
+        emitter.onTimeout(() -> removeShareEmitter(token, emitter));
+        emitter.onError(ex -> removeShareEmitter(token, emitter));
+
+        try {
+            emitter.send(SseEmitter.event().name("connected").data("ok"));
+        } catch (IOException e) {
+            removeShareEmitter(token, emitter);
+        }
+
+        return emitter;
+    }
+
     private String shareSessionKey(String token) {
         return "share_unlocked_" + token;
+    }
+
+    private void notifyScoresUpdated(MatchGroup group) {
+        if (group.getShareToken() == null) return;
+
+        List<SseEmitter> emitters = shareEmitters.getOrDefault(group.getShareToken(), new CopyOnWriteArrayList<>());
+        for (SseEmitter emitter : emitters) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("scores-updated")
+                        .data(Map.of("matchGroupId", group.getId())));
+            } catch (IOException | IllegalStateException e) {
+                removeShareEmitter(group.getShareToken(), emitter);
+            }
+        }
+    }
+
+    private void removeShareEmitter(String token, SseEmitter emitter) {
+        List<SseEmitter> emitters = shareEmitters.get(token);
+        if (emitters == null) return;
+        emitters.remove(emitter);
+        if (emitters.isEmpty()) {
+            shareEmitters.remove(token);
+        }
     }
 
     private String generateShareToken() {
