@@ -131,6 +131,32 @@ header {
     line-height: 1.65;
 }
 
+.usage-guide {
+    padding: 16px 20px;
+}
+
+.usage-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 18px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--clr-text);
+}
+
+.usage-steps li {
+    padding-left: 2px;
+}
+
+.usage-steps strong {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--clr-teal);
+    font-weight: 700;
+}
+
 /* ===== INPUT SECTION ===== */
 .input-header {
     display: flex;
@@ -223,19 +249,20 @@ header {
     border: 2px solid var(--clr-teal-mid);
     border-radius: var(--radius-pill);
     font-family: var(--font-body);
-    font-size: 18px;
+    font-size: 13px;
     font-weight: bold;
     text-align: center;
     text-align-last: center;
     appearance: none;
     -webkit-appearance: none;
     cursor: pointer;
-    padding: 0 24px 0 12px;
+    padding: 0 22px 0 6px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%231E7272' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 8px center;
+    background-position: right 6px center;
     outline: none;
     transition: box-shadow 0.2s;
+    flex-shrink: 0;
 }
 
 .grade-select:focus {
@@ -340,6 +367,12 @@ header {
     margin-bottom: 20px;
 }
 
+.excel-label-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .excel-label {
     font-family: var(--font-body);
     font-size: 16px;
@@ -404,8 +437,76 @@ header {
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 10px 16px;
     margin-bottom: 20px;
+}
+
+.excel-help {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+}
+
+.excel-help-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--clr-teal);
+    background: var(--clr-white);
+    color: var(--clr-teal);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.excel-help-tooltip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    width: min(320px, calc(100vw - 48px));
+    padding: 10px 12px;
+    border: 1.5px solid var(--clr-teal-pale);
+    border-radius: var(--radius-sm);
+    background: var(--clr-white);
+    color: var(--clr-text);
+    box-shadow: var(--shadow-card);
+    font-family: var(--font-body);
+    font-size: 12px;
+    line-height: 1.55;
+    text-align: left;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(-50%, 4px);
+    transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+    z-index: 20;
+}
+
+.excel-help-tooltip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 9px;
+    height: 9px;
+    background: var(--clr-white);
+    border-right: 1.5px solid var(--clr-teal-pale);
+    border-bottom: 1.5px solid var(--clr-teal-pale);
+    transform: translate(-50%, -5px) rotate(45deg);
+}
+
+.excel-help:hover .excel-help-tooltip,
+.excel-help:focus .excel-help-tooltip,
+.excel-help:focus-within .excel-help-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
 }
 
 .court-label {
@@ -1014,7 +1115,7 @@ header {
     .player-name-input { height: 44px; font-size: 14px; padding: 0 16px; }
     .gender-select { width: 62px; height: 44px; font-size: 12px; padding: 0 20px 0 6px; }
     .age-select    { width: 62px; height: 44px; font-size: 12px; padding: 0 18px 0 4px; }
-    .grade-select  { width: 62px; height: 44px; font-size: 16px; }
+    .grade-select  { width: 62px; height: 44px; font-size: 12px; padding: 0 18px 0 4px; }
     .value-input   { width: 76px; height: 44px; font-size: 16px; }
 
     .btn-group .btn { font-size: 13px; padding: 8px 12px; }

@@ -27,22 +27,30 @@
         <p class="subtitle">참가자 성함과 급수를 입력하고 대진표를 생성하세요</p>
     </header>
     <main>
-        <section class="info-box">
-            <h3>📋 급수 안내</h3>
-            <div class="grade-legend">
-                <span class="grade-badge grade-s">S</span>
-                <span class="grade-badge grade-a">A</span>
-                <span class="grade-badge grade-b">B</span>
-                <span class="grade-badge grade-c">C</span>
-                <span class="grade-badge grade-d">D</span>
-                <span class="grade-badge grade-e">E</span>
-                <span class="grade-badge grade-f">F</span>
-            </div>
-            <p class="info-text">
-                S~F 등급까지 존재합니다.<br/>
-                같은 등급 내의 실력 차이는 등급 옆 수치로 입력해주세요.(0~100까지만 입력가능)<br/>
-                대진표에서 드래그앤드롭으로 수동 조정 가능합니다
-            </p>
+        <section class="info-box usage-guide">
+            <h3>📋 사용법 안내</h3>
+            <ol class="usage-steps">
+                <li>
+                    <strong>참가자 정보를 입력하세요.</strong>
+                    선수 이름을 입력하고 나이, 급수, 성별, 수치를 선택합니다. 급수는 S~F 순서이며, 수치는 같은 급수 안에서의 실력 차이를 0~100으로 조정할 때 사용합니다.
+                </li>
+                <li>
+                    <strong>코트 수와 인당 게임 수를 정하세요.</strong>
+                    자동으로 두면 참가자 수에 맞춰 코트와 게임 수가 계산됩니다. 직접 조정하고 싶을 때만 아래 설정에서 변경하세요.
+                </li>
+                <li>
+                    <strong>대진표 생성을 누르세요.</strong>
+                    입력된 급수와 수치를 기준으로 코트별 실력 차이를 줄이고, 파트너 중복을 최소화해 복식 대진표를 만듭니다.
+                </li>
+                <li>
+                    <strong>결과를 확인하고 필요하면 조정하세요.</strong>
+                    생성된 대진표는 드래그앤드롭으로 선수를 옮겨 수동 조정할 수 있고, 엑셀 다운로드로 보관할 수 있습니다.
+                </li>
+                <li>
+                    <strong>저장 및 링크 공유는 로그인 후 이용할 수 있어요.</strong>
+                    대진표 생성 후 내 대진표 메뉴에 들어가 공유버튼을 통해 공유링크와 QR코드를 만들 수 있습니다.
+                </li>
+            </ol>
         </section>
 
         <section class="input-section">
@@ -62,7 +70,15 @@
             </div>
 
             <div class="excel-section">
-                <span class="excel-label">엑셀 일괄 입력</span>
+                <span class="excel-label-group">
+                    <span class="excel-help" tabindex="0" aria-label="엑셀 업로드 방법">
+                        <span class="excel-help-icon" aria-hidden="true">i</span>
+                        <span class="excel-help-tooltip" role="tooltip">
+                            엑셀 양식 다운로드 후 선수명, 등급, 수치, 성별, 나이를 입력하고 업로드하세요. 업로드가 완료되면 참가자 입력란에 자동으로 반영됩니다.
+                        </span>
+                    </span>
+                    <span class="excel-label">엑셀 일괄 입력</span>
+                </span>
                 <a href="${pageContext.request.contextPath}/api/excel-template"
                    class="btn btn-excel-dl" download>📥 양식 다운로드</a>
                 <label class="btn btn-excel-ul">

@@ -31,7 +31,7 @@ function totalScore(player) {
 let players = [];
 const MIN_PLAYERS = 4;
 
-function addPlayer(name = '', grade = 'C', rating = 50, gender = '', age = 0) {
+function addPlayer(name = '', grade = '', rating = 50, gender = '', age = 0) {
     players.push({ name, grade, rating, gender, age });
     renderPlayerRow(players.length - 1);
     updateCount();
@@ -97,6 +97,7 @@ function renderPlayerRow(index) {
                     name="player[${index}][grade]"
                     class="grade-select"
                     onchange="updatePlayer(${index}, 'grade', this.value)">
+                <option value="" ${!p.grade ? 'selected' : ''}>급수</option>
                 ${gradeOptions}
             </select>
             <select id="player-gender-${index}"
@@ -265,6 +266,11 @@ function generateDraw() {
     const validPlayers = players.filter(p => p.name.trim() !== '');
     if (validPlayers.length < 4) {
         showValidation('최소 4명 이상 입력해주세요.');
+        return;
+    }
+    const noGrade = validPlayers.filter(p => !p.grade);
+    if (noGrade.length > 0) {
+        showValidation(`급수를 선택하지 않은 선수가 있습니다. (${noGrade.map(p => p.name || '이름없음').join(', ')})`);
         return;
     }
     const noGender = validPlayers.filter(p => !p.gender);
