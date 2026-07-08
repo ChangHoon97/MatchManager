@@ -45,9 +45,15 @@
         <div id="detailModalBody" class="modal-body">
             <!-- 결과가 여기에 출력됨 -->
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-save-draw" onclick="saveScores()">점수 저장</button>
-            <button class="btn btn-close" onclick="closeDetailModal()">닫기</button>
+        <div class="modal-footer detail-modal-footer">
+            <div class="modal-footer-left">
+                <button class="btn btn-save-draw" onclick="saveScores()">점수 저장</button>
+            </div>
+            <div class="modal-footer-right">
+                <button class="btn btn-excel-result" onclick="downloadExcel()">📊 엑셀 다운로드</button>
+                <button class="btn btn-print" onclick="window.print()">🖨️ 인쇄</button>
+                <button class="btn btn-close" onclick="closeDetailModal()">닫기</button>
+            </div>
         </div>
     </div>
 </div>

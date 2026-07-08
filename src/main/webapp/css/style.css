@@ -801,6 +801,23 @@ header {
     flex-shrink: 0;
 }
 
+.detail-modal-footer {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-footer-left,
+.modal-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.modal-footer-right {
+    justify-content: flex-end;
+}
+
 /* ===== 코트 섹션 ===== */
 .court-section {
     background: rgba(255, 255, 255, 0.80);
@@ -1139,7 +1156,11 @@ header {
     .modal-header { padding: 16px 18px; }
     .modal-header h2 { font-size: 22px; }
     .modal-footer { padding: 12px 14px; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .detail-modal-footer { justify-content: space-between; align-items: flex-start; }
+    .modal-footer-left,
+    .modal-footer-right { gap: 8px; }
     .btn-save-draw,
+    .btn-excel-result,
     .btn-print,
     .btn-regenerate,
     .btn-close    { font-size: 13px; padding: 8px 14px; }
