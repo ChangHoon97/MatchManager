@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -215,6 +216,74 @@ class ApiControllerTest {
         mockMvc.perform(get("/api/auth/me"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
+    }
+
+    @Test
+    void signupRejectsWeakPassword() throws Exception {
+        mockMvc.perform(post("/api/auth/signup")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "new@example.com",
+                                  "password": "password1",
+                                  "nickname": "tester"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("비밀번호는 8~30자이며 영어, 숫자, 특수문자(!@#$%^&*)를 모두 포함해야 합니다."));
+    }
+
+    @Test
+    void signupRejectsTooLongPassword() throws Exception {
+        mockMvc.perform(post("/api/auth/signup")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "new@example.com",
+                                  "password": "Password1!Password1!Password1!A",
+                                  "nickname": "tester"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").isString());
+    }
+
+    @Test
+    void signupRejectsUnsupportedSpecialCharacter() throws Exception {
+        mockMvc.perform(post("/api/auth/signup")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "new@example.com",
+                                  "password": "Password1?",
+                                  "nickname": "tester"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("비밀번호는 8~30자이며 영어, 숫자, 특수문자(!@#$%^&*)를 모두 포함해야 합니다."));
+    }
+
+    @Test
+    void signupRejectsDuplicateNickname() throws Exception {
+        User existing = new User("old@example.com", "{noop}password", "tester", null, User.PROVIDER_LOCAL);
+        when(userRepository.findByEmailAndDelYn("new@example.com", "N")).thenReturn(Optional.empty());
+        when(userRepository.findByNicknameAndDelYn("tester", "N")).thenReturn(Optional.of(existing));
+
+        mockMvc.perform(post("/api/auth/signup")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "new@example.com",
+                                  "password": "Password1!",
+                                  "nickname": "tester"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("이미 사용 중인 닉네임입니다."));
     }
 
     private List<Court> sampleCourts() {

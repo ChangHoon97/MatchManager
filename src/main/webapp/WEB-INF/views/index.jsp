@@ -176,7 +176,7 @@
         </div>
         <div class="modal-body">
             <input type="email" id="signupEmail" class="auth-input" placeholder="이메일">
-            <input type="password" id="signupPassword" class="auth-input" placeholder="비밀번호 (8자 이상)">
+            <input type="password" id="signupPassword" class="auth-input" placeholder="비밀번호 (8~30자, 영어/숫자/!@#$%^&* 포함)">
             <input type="password" id="signupPasswordConfirm" class="auth-input" placeholder="비밀번호 확인">
             <input type="text" id="signupNickname" class="auth-input" placeholder="닉네임" maxlength="20">
             <input type="text" id="signupCelno" class="auth-input" placeholder="휴대폰번호 (선택)">

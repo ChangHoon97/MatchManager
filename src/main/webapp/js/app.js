@@ -685,6 +685,9 @@ function hideAuthMsg(elId) {
     if (el) el.classList.add('hidden');
 }
 
+const SIGNUP_PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,30}$/;
+const SIGNUP_PASSWORD_RULE_MESSAGE = '비밀번호는 8~30자이며 영어, 숫자, 특수문자(!@#$%^&*)를 모두 포함해야 합니다.';
+
 function doLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -713,6 +716,11 @@ function doSignup() {
     const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
     const nickname = document.getElementById('signupNickname').value.trim();
     const celno = document.getElementById('signupCelno').value.trim();
+
+    if (!SIGNUP_PASSWORD_PATTERN.test(password)) {
+        showAuthMsg('signupMsg', SIGNUP_PASSWORD_RULE_MESSAGE);
+        return;
+    }
 
     if (password !== passwordConfirm) {
         showAuthMsg('signupMsg', '비밀번호가 일치하지 않습니다.');

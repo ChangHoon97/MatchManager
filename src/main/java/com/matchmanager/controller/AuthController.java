@@ -34,14 +34,18 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<UserInfoDto> signup(@Valid @RequestBody SignupRequestDto req) {
         String email = req.getEmail().trim().toLowerCase();
+        String nickname = req.getNickname().trim();
         if (userRepository.findByEmailAndDelYn(email, "N").isPresent()) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+        }
+        if (userRepository.findByNicknameAndDelYn(nickname, "N").isPresent()) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
         }
 
         User user = new User(
                 email,
                 passwordEncoder.encode(req.getPassword()),
-                req.getNickname(),
+                nickname,
                 (req.getCelno() == null || req.getCelno().isBlank()) ? null : req.getCelno(),
                 User.PROVIDER_LOCAL
         );
