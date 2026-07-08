@@ -76,6 +76,7 @@
                 </div>
                 <div id="qrcodeContainer" class="qrcode-container"></div>
                 <button type="button" class="btn btn-google" onclick="downloadQrCode()">📥 QR 코드 다운로드</button>
+                <button type="button" class="btn btn-share-stop" onclick="stopShare()">공유 중단</button>
             </div>
             <button type="button" class="btn btn-generate" onclick="doCreateShare()">공유 링크 만들기</button>
         </div>

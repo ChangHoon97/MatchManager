@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -181,6 +182,16 @@ class ApiControllerTest {
                         .content("{\"password\":\"123\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("공유 비밀번호는 4자 이상 30자 이하여야 합니다."));
+    }
+
+    @Test
+    void stopShareUsesAuthenticatedPrincipal() throws Exception {
+        mockMvc.perform(delete("/api/draws/1/share")
+                        .with(authentication(userPrincipal(7L)))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isNoContent());
+
+        verify(matchGroupService).stopShare(eq(1L), eq(7L));
     }
 
     @Test

@@ -1406,6 +1406,24 @@ header {
     margin-top: 0;
 }
 
+.btn-share-stop {
+    margin-top: 8px;
+    width: 100%;
+    padding: 10px 18px;
+    border: 2px solid #c75656;
+    border-radius: var(--radius-pill);
+    background: var(--clr-white);
+    color: #b13f3f;
+    font-family: var(--font-body);
+    font-size: 14px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-share-stop:hover {
+    background: #c75656;
+    color: var(--clr-white);
+}
+
 .app-toast {
     position: fixed;
     left: 50%;

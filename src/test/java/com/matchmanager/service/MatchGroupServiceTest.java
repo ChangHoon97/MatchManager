@@ -86,6 +86,28 @@ class MatchGroupServiceTest {
     }
 
     @Test
+    void stopShareClearsShareTokenAndPassword() {
+        MatchGroup group = sharedGroup();
+        when(matchGroupRepository.findByIdAndDelYn(1L, "N")).thenReturn(Optional.of(group));
+
+        service.stopShare(1L, 7L);
+
+        assertThat(group.getShareToken()).isNull();
+        assertThat(group.getPassword()).isNull();
+        verify(matchGroupRepository).save(group);
+    }
+
+    @Test
+    void stopShareOnlyForOwner() {
+        MatchGroup group = sharedGroup();
+        when(matchGroupRepository.findByIdAndDelYn(1L, "N")).thenReturn(Optional.of(group));
+
+        assertThatThrownBy(() -> service.stopShare(1L, 8L))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("본인이 저장한 대진표만 공유 중단할 수 있습니다.");
+    }
+
+    @Test
     void subscribeShareEventsRequiresUnlockedSession() {
         MatchGroup group = sharedGroup();
         HttpSession session = mock(HttpSession.class);
