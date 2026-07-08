@@ -36,7 +36,7 @@
                 </li>
                 <li>
                     <strong>코트 수와 인당 게임 수를 정하세요.</strong>
-                    자동으로 두면 참가자 수에 맞춰 코트와 게임 수가 계산됩니다. 직접 조정하고 싶을 때만 아래 설정에서 변경하세요.
+                    코트 수와 인당 게임 수는 1부터 선택할 수 있습니다. 참가자 수에 맞게 코트 수를 정하고, 한 사람이 몇 게임씩 참여할지 직접 설정하세요.
                 </li>
                 <li>
                     <strong>대진표 생성을 누르세요.</strong>
@@ -96,13 +96,13 @@
             <span class="court-label">코트 수</span>
             <div class="court-stepper">
                 <button type="button" class="stepper-btn" onclick="changeCourtCount(-1)">−</button>
-                <span id="courtCountDisplay" class="stepper-val">자동</span>
+                <span id="courtCountDisplay" class="stepper-val">1</span>
                 <button type="button" class="stepper-btn" onclick="changeCourtCount(+1)">+</button>
             </div>
             <span class="court-label">인당 게임 수</span>
             <div class="court-stepper">
                 <button type="button" class="stepper-btn" onclick="changeGameCount(-1)">−</button>
-                <span id="gameCountDisplay" class="stepper-val">자동</span>
+                <span id="gameCountDisplay" class="stepper-val">1</span>
                 <button type="button" class="stepper-btn" onclick="changeGameCount(+1)">+</button>
             </div>
         </div>

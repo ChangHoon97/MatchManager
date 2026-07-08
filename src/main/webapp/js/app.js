@@ -244,20 +244,18 @@ function hideExcelMsg() {
 
 // ========== 코트 수 ==========
 
-let courtCount = 0; // 0 = 자동
+let courtCount = 1;
 
 function changeCourtCount(delta) {
-    courtCount = Math.max(0, courtCount + delta);
-    document.getElementById('courtCountDisplay').textContent =
-        courtCount === 0 ? '자동' : courtCount;
+    courtCount = Math.max(1, courtCount + delta);
+    document.getElementById('courtCountDisplay').textContent = courtCount;
 }
 
-let gamesPerPlayer = 0; // 0 = 자동
+let gamesPerPlayer = 1;
 
 function changeGameCount(delta) {
-    gamesPerPlayer = Math.max(0, gamesPerPlayer + delta);
-    document.getElementById('gameCountDisplay').textContent =
-        gamesPerPlayer === 0 ? '자동' : gamesPerPlayer;
+    gamesPerPlayer = Math.max(1, gamesPerPlayer + delta);
+    document.getElementById('gameCountDisplay').textContent = gamesPerPlayer;
 }
 
 // ========== 대진표 생성 ==========
@@ -266,6 +264,14 @@ function generateDraw() {
     const validPlayers = players.filter(p => p.name.trim() !== '');
     if (validPlayers.length < 4) {
         showValidation('최소 4명 이상 입력해주세요.');
+        return;
+    }
+    if (!courtCount || courtCount < 1) {
+        showValidation('코트수를 입력해주세요.');
+        return;
+    }
+    if (!gamesPerPlayer || gamesPerPlayer < 1) {
+        showValidation('인원 수를 입력해주세요.');
         return;
     }
     const noGrade = validPlayers.filter(p => !p.grade);
