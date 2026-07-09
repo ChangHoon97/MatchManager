@@ -41,6 +41,11 @@ public class DrawController {
         return "myDraws";
     }
 
+    @GetMapping("/mypage")
+    public String mypage() {
+        return "mypage";
+    }
+
     @GetMapping("/share/{token}")
     public String share(@PathVariable String token, Model model) {
         model.addAttribute("shareToken", token);

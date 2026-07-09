@@ -1,6 +1,8 @@
 package com.matchmanager.controller;
 
 import com.matchmanager.dto.LoginRequestDto;
+import com.matchmanager.dto.PasswordUpdateRequestDto;
+import com.matchmanager.dto.ProfileUpdateRequestDto;
 import com.matchmanager.dto.SignupRequestDto;
 import com.matchmanager.dto.UserInfoDto;
 import com.matchmanager.entity.User;
@@ -51,7 +53,7 @@ public class AuthController {
         );
         userRepository.save(user);
 
-        return ResponseEntity.ok(new UserInfoDto(user.getId(), user.getEmail(), user.getNickname()));
+        return ResponseEntity.ok(toUserInfo(user));
     }
 
     @PostMapping("/login")
@@ -86,10 +88,82 @@ public class AuthController {
         if (principal == null) {
             return ResponseEntity.status(401).body(errorBody("로그인이 필요합니다."));
         }
-        return ResponseEntity.ok(new UserInfoDto(principal.getId(), principal.getEmail(), principal.getNickname()));
+        User user = userRepository.findByIdAndDelYn(principal.getId(), "N")
+                .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
+        return ResponseEntity.ok(toUserInfo(user));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<?> updateMe(@AuthenticationPrincipal UserPrincipal principal,
+                                      @Valid @RequestBody ProfileUpdateRequestDto req,
+                                      HttpServletRequest request,
+                                      HttpServletResponse response) {
+        if (principal == null) {
+            return ResponseEntity.status(401).body(errorBody("로그인이 필요합니다."));
+        }
+
+        User user = userRepository.findByIdAndDelYn(principal.getId(), "N")
+                .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
+        String nickname = req.getNickname().trim();
+        userRepository.findByNicknameAndDelYn(nickname, "N")
+                .filter(existing -> !existing.getId().equals(user.getId()))
+                .ifPresent(existing -> {
+                    throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+                });
+
+        user.setNickname(nickname);
+        user.setCelno((req.getCelno() == null || req.getCelno().isBlank()) ? null : req.getCelno().trim());
+        userRepository.save(user);
+        refreshAuthentication(user, request, response);
+
+        return ResponseEntity.ok(toUserInfo(user));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<?> updatePassword(@AuthenticationPrincipal UserPrincipal principal,
+                                            @Valid @RequestBody PasswordUpdateRequestDto req,
+                                            HttpServletRequest request,
+                                            HttpServletResponse response) {
+        if (principal == null) {
+            return ResponseEntity.status(401).body(errorBody("로그인이 필요합니다."));
+        }
+
+        User user = userRepository.findByIdAndDelYn(principal.getId(), "N")
+                .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
+        if (!User.PROVIDER_LOCAL.equals(user.getProvider())) {
+            throw new IllegalArgumentException("Google 로그인 계정은 비밀번호를 변경할 수 없습니다.");
+        }
+        if (user.getPassword() == null || !passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+        }
+
+        user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        userRepository.save(user);
+        refreshAuthentication(user, request, response);
+
+        return ResponseEntity.noContent().build();
     }
 
     private java.util.Map<String, Object> errorBody(String message) {
         return java.util.Map.of("error", true, "message", message);
+    }
+
+    private UserInfoDto toUserInfo(User user) {
+        return new UserInfoDto(user.getId(), user.getEmail(), user.getNickname(), user.getCelno(), user.getProvider());
+    }
+
+    private void refreshAuthentication(User user, HttpServletRequest request, HttpServletResponse response) {
+        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal updatedPrincipal = new UserPrincipal(user);
+        Authentication updatedAuth = new UsernamePasswordAuthenticationToken(
+                updatedPrincipal,
+                currentAuth == null ? null : currentAuth.getCredentials(),
+                updatedPrincipal.getAuthorities()
+        );
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(updatedAuth);
+        SecurityContextHolder.setContext(context);
+        securityContextRepository.saveContext(context, request, response);
     }
 }

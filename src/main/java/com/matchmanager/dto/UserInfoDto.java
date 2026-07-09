@@ -9,4 +9,10 @@ public class UserInfoDto {
     private Long id;
     private String email;
     private String nickname;
+    private String celno;
+    private String provider;
+
+    public UserInfoDto(Long id, String email, String nickname) {
+        this(id, email, nickname, null, null);
+    }
 }

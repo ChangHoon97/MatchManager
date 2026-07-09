@@ -647,6 +647,7 @@ function renderAuthWidget() {
     if (currentUser) {
         el.innerHTML = `
             <span class="auth-nickname">${escapeHtml(currentUser.nickname)}님</span>
+            <a href="${window.location.origin}/mypage" class="btn btn-auth">마이페이지</a>
             <a href="${window.location.origin}/my-draws" class="btn btn-auth">내 대진표</a>
             <button type="button" class="btn btn-auth" onclick="doLogout()">로그아웃</button>
         `;
