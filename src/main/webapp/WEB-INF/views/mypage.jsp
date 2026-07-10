@@ -46,7 +46,6 @@
             <div id="profileMsg" class="validation-msg hidden"></div>
             <div class="profile-actions">
                 <button type="button" class="btn btn-save-draw" onclick="saveProfile()">저장</button>
-                <a href="${pageContext.request.contextPath}/my-draws" class="btn btn-auth">내 대진표</a>
             </div>
         </section>
 
