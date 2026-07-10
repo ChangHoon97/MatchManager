@@ -194,6 +194,7 @@
             <input type="email" id="signupEmail" class="auth-input" placeholder="이메일">
             <input type="password" id="signupPassword" class="auth-input" placeholder="비밀번호 (8~30자, 영어/숫자/!@#$%^&* 포함)">
             <input type="password" id="signupPasswordConfirm" class="auth-input" placeholder="비밀번호 확인">
+            <input type="text" id="signupName" class="auth-input" placeholder="이름" maxlength="20">
             <input type="text" id="signupNickname" class="auth-input" placeholder="닉네임" maxlength="20">
             <input type="text" id="signupCelno" class="auth-input" placeholder="휴대폰번호 (선택)">
             <div id="signupMsg" class="validation-msg hidden"></div>

@@ -36,6 +36,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<UserInfoDto> signup(@Valid @RequestBody SignupRequestDto req) {
         String email = req.getEmail().trim().toLowerCase();
+        String name = req.getName().trim();
         String nickname = req.getNickname().trim();
         if (userRepository.findByEmailAndDelYn(email, "N").isPresent()) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
@@ -47,6 +48,7 @@ public class AuthController {
         User user = new User(
                 email,
                 passwordEncoder.encode(req.getPassword()),
+                name,
                 nickname,
                 (req.getCelno() == null || req.getCelno().isBlank()) ? null : req.getCelno(),
                 User.PROVIDER_LOCAL
@@ -104,6 +106,7 @@ public class AuthController {
 
         User user = userRepository.findByIdAndDelYn(principal.getId(), "N")
                 .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
+        String name = req.getName().trim();
         String nickname = req.getNickname().trim();
         userRepository.findByNicknameAndDelYn(nickname, "N")
                 .filter(existing -> !existing.getId().equals(user.getId()))
@@ -111,6 +114,7 @@ public class AuthController {
                     throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
                 });
 
+        user.setName(name);
         user.setNickname(nickname);
         user.setCelno((req.getCelno() == null || req.getCelno().isBlank()) ? null : req.getCelno().trim());
         userRepository.save(user);
@@ -149,7 +153,7 @@ public class AuthController {
     }
 
     private UserInfoDto toUserInfo(User user) {
-        return new UserInfoDto(user.getId(), user.getEmail(), user.getNickname(), user.getCelno(), user.getProvider());
+        return new UserInfoDto(user.getId(), user.getEmail(), user.getName(), user.getNickname(), user.getCelno(), user.getProvider());
     }
 
     private void refreshAuthentication(User user, HttpServletRequest request, HttpServletResponse response) {

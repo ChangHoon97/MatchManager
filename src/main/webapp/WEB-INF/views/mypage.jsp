@@ -37,6 +37,9 @@
             <label class="profile-label" for="profileEmail">아이디</label>
             <input type="email" id="profileEmail" class="auth-input profile-readonly" readonly>
 
+            <label class="profile-label" for="profileName">이름</label>
+            <input type="text" id="profileName" class="auth-input" maxlength="20" placeholder="이름">
+
             <label class="profile-label" for="profileNickname">닉네임</label>
             <input type="text" id="profileNickname" class="auth-input" maxlength="20" placeholder="닉네임">
 

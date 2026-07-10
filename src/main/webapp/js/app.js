@@ -727,6 +727,7 @@ function doSignup() {
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
     const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+    const name = document.getElementById('signupName').value.trim();
     const nickname = document.getElementById('signupNickname').value.trim();
     const celno = document.getElementById('signupCelno').value.trim();
 
@@ -743,7 +744,7 @@ function doSignup() {
     fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
-        body: JSON.stringify({ email, password, nickname, celno })
+        body: JSON.stringify({ email, password, name, nickname, celno })
     })
     .then(async res => {
         const data = await res.json();

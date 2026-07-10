@@ -234,12 +234,14 @@ class ApiControllerTest {
     void authMeReturnsProfileInfo() throws Exception {
         User user = new User("user7@example.com", "{noop}password", "테스터", "010-1234-5678", User.PROVIDER_LOCAL);
         user.setId(7L);
+        user.setName("Tester Name");
         when(userRepository.findByIdAndDelYn(7L, "N")).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/api/auth/me")
                         .with(authentication(userPrincipal(7L))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("user7@example.com"))
+                .andExpect(jsonPath("$.name").value("Tester Name"))
                 .andExpect(jsonPath("$.nickname").value("테스터"))
                 .andExpect(jsonPath("$.celno").value("010-1234-5678"));
     }
@@ -258,12 +260,14 @@ class ApiControllerTest {
                         .content("""
                                 {
                                   "email": "changed@example.com",
+                                  "name": "Updated Name",
                                   "nickname": "새닉네임",
                                   "celno": "010-2222-3333"
                                 }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("user7@example.com"))
+                .andExpect(jsonPath("$.name").value("Updated Name"))
                 .andExpect(jsonPath("$.nickname").value("새닉네임"))
                 .andExpect(jsonPath("$.celno").value("010-2222-3333"));
     }
@@ -341,6 +345,7 @@ class ApiControllerTest {
                                 {
                                   "email": "new@example.com",
                                   "password": "password1",
+                                  "name": "Tester",
                                   "nickname": "tester"
                                 }
                                 """))
@@ -357,6 +362,7 @@ class ApiControllerTest {
                                 {
                                   "email": "new@example.com",
                                   "password": "Password1!Password1!Password1!A",
+                                  "name": "Tester",
                                   "nickname": "tester"
                                 }
                                 """))
@@ -373,6 +379,7 @@ class ApiControllerTest {
                                 {
                                   "email": "new@example.com",
                                   "password": "Password1?",
+                                  "name": "Tester",
                                   "nickname": "tester"
                                 }
                                 """))
@@ -393,6 +400,7 @@ class ApiControllerTest {
                                 {
                                   "email": "new@example.com",
                                   "password": "Password1!",
+                                  "name": "Tester",
                                   "nickname": "tester"
                                 }
                                 """))

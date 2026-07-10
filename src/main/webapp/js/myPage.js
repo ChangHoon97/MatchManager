@@ -14,6 +14,7 @@ function loadProfile() {
             currentUser = user;
             renderAuthWidget();
             document.getElementById('profileEmail').value = user.email || '';
+            document.getElementById('profileName').value = user.name || '';
             document.getElementById('profileNickname').value = user.nickname || '';
             document.getElementById('profileCelno').value = user.celno || '';
             setPasswordSection(user);
@@ -22,13 +23,14 @@ function loadProfile() {
 }
 
 function saveProfile() {
+    const name = document.getElementById('profileName').value.trim();
     const nickname = document.getElementById('profileNickname').value.trim();
     const celno = document.getElementById('profileCelno').value.trim();
 
     fetch('/api/auth/me', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
-        body: JSON.stringify({ nickname, celno })
+        body: JSON.stringify({ name, nickname, celno })
     })
     .then(async res => {
         const data = await res.json().catch(() => null);
@@ -43,6 +45,7 @@ function saveProfile() {
         if (!user) return;
         currentUser = user;
         renderAuthWidget();
+        document.getElementById('profileName').value = user.name || '';
         document.getElementById('profileNickname').value = user.nickname || '';
         document.getElementById('profileCelno').value = user.celno || '';
         showAuthMsg('profileMsg', '회원 정보가 저장되었습니다.');

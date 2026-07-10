@@ -22,15 +22,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String rawEmail = oauth2User.getAttribute("email");
         final String sub = oauth2User.getAttribute("sub");
         final String name = oauth2User.getAttribute("name");
+        final String familyName = oauth2User.getAttribute("family_name");
+        final String givenName = oauth2User.getAttribute("given_name");
         if (rawEmail == null) {
             throw new OAuth2AuthenticationException("구글 계정에서 이메일 정보를 가져올 수 없습니다.");
         }
         final String email = rawEmail.trim().toLowerCase();
+        final String displayName = resolveDisplayName(name, familyName, givenName, email);
 
         User user = userRepository.findByEmailAndDelYn(email, "N")
                 .orElseGet(() -> {
-                    User created = new User(email, null,
-                            (name != null && !name.isBlank()) ? name : email,
+                    User created = new User(email, null, displayName, displayName,
                             null, User.PROVIDER_GOOGLE);
                     created.setProviderId(sub);
                     return userRepository.save(created);
@@ -44,5 +46,48 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         UserPrincipal principal = new UserPrincipal(user);
         principal.setAttributes(oauth2User.getAttributes());
         return principal;
+    }
+
+    private String resolveDisplayName(String name, String familyName, String givenName, String email) {
+        String trimmedName = trimToNull(name);
+        if (trimmedName != null) {
+            return trimmedName;
+        }
+
+        String combinedName = joinNames(trimToNull(familyName), trimToNull(givenName));
+        if (combinedName != null) {
+            return combinedName;
+        }
+
+        String trimmedGivenName = trimToNull(givenName);
+        if (trimmedGivenName != null) {
+            return trimmedGivenName;
+        }
+
+        int atIndex = email.indexOf('@');
+        if (atIndex > 0) {
+            return email.substring(0, atIndex);
+        }
+        return "사용자";
+    }
+
+    private String joinNames(String familyName, String givenName) {
+        if (familyName == null && givenName == null) {
+            return null;
+        }
+        if (familyName == null) {
+            return givenName;
+        }
+        if (givenName == null) {
+            return familyName;
+        }
+        return familyName + givenName;
+    }
+
+    private String trimToNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
     }
 }
