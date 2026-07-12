@@ -216,6 +216,37 @@ function doCreateShare() {
     .catch(err => showAuthMsg('shareMsg', err.message));
 }
 
+function stopShare() {
+    if (!shareDrawId) return;
+    if (!confirm('공유를 중단할까요? 기존 공유 링크와 QR코드는 더 이상 사용할 수 없습니다.')) return;
+
+    fetch(`/api/draws/${shareDrawId}/share`, {
+        method: 'DELETE',
+        headers: { 'X-XSRF-TOKEN': getCsrfToken() }
+    })
+    .then(async res => {
+        if (res.status === 401) {
+            redirectToHomeForLogin();
+            return false;
+        }
+        if (!res.ok && res.status !== 204) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data?.message || '공유 중단에 실패했습니다.');
+        }
+        return true;
+    })
+    .then(stopped => {
+        if (!stopped) return;
+        document.getElementById('sharePassword').value = '';
+        document.getElementById('shareUrlResult').value = '';
+        document.getElementById('qrcodeContainer').innerHTML = '';
+        setShareResultVisible(false);
+        loadMyDraws();
+        showToast('공유가 중단되었습니다.');
+    })
+    .catch(err => showAuthMsg('shareMsg', err.message));
+}
+
 function setShareResultVisible(visible) {
     const result = document.getElementById('shareResult');
     if (!result) return;

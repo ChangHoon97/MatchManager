@@ -180,6 +180,21 @@ public class MatchGroupService {
         );
     }
 
+    @Transactional
+    public void stopShare(Long groupId, Long userId) {
+        MatchGroup group = matchGroupRepository.findByIdAndDelYn(groupId, NOT_DELETED)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 대진표입니다."));
+        if (!group.getRegId().equals(userId)) {
+            throw new ForbiddenException("본인이 저장한 대진표만 공유 중단할 수 있습니다.");
+        }
+
+        String oldToken = group.getShareToken();
+        group.setShareToken(null);
+        group.setPassword(null);
+        matchGroupRepository.save(group);
+        closeShareEmittersAfterCommit(oldToken);
+    }
+
     public ShareViewDto getShareView(String token, HttpSession session) {
         MatchGroup group = matchGroupRepository.findByShareTokenAndDelYn(token, NOT_DELETED)
                 .orElseThrow(() -> new NotFoundException("존재하지 않거나 만료된 링크입니다."));
@@ -267,6 +282,34 @@ public class MatchGroupService {
         if (emitters.isEmpty()) {
             shareEmitters.remove(token);
         }
+    }
+
+    private void closeShareEmitters(String token) {
+        if (token == null) return;
+        List<SseEmitter> emitters = shareEmitters.remove(token);
+        if (emitters == null) return;
+        for (SseEmitter emitter : emitters) {
+            try {
+                emitter.complete();
+            } catch (IllegalStateException ignored) {
+                // Already closed by the client or container.
+            }
+        }
+    }
+
+    private void closeShareEmittersAfterCommit(String token) {
+        if (token == null) return;
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            closeShareEmitters(token);
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                closeShareEmitters(token);
+            }
+        });
     }
 
     private String generateShareToken() {

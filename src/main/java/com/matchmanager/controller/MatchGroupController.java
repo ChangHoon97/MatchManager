@@ -69,4 +69,11 @@ public class MatchGroupController {
                                                           @PathVariable Long id) {
         return ResponseEntity.ok(matchGroupService.getShareInfo(id, principal.getId()));
     }
+
+    @DeleteMapping("/{id}/share")
+    public ResponseEntity<Void> stopShare(@AuthenticationPrincipal UserPrincipal principal,
+                                          @PathVariable Long id) {
+        matchGroupService.stopShare(id, principal.getId());
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -30,6 +31,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -38,6 +40,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -183,6 +186,16 @@ class ApiControllerTest {
     }
 
     @Test
+    void stopShareUsesAuthenticatedPrincipal() throws Exception {
+        mockMvc.perform(delete("/api/draws/1/share")
+                        .with(authentication(userPrincipal(7L)))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isNoContent());
+
+        verify(matchGroupService).stopShare(eq(1L), eq(7L));
+    }
+
+    @Test
     void updateScoresUsesAuthenticatedPrincipal() throws Exception {
         mockMvc.perform(put("/api/draws/1/scores")
                         .with(authentication(userPrincipal(7L)))
@@ -217,6 +230,184 @@ class ApiControllerTest {
                 .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
+    @Test
+    void authMeReturnsProfileInfo() throws Exception {
+        User user = new User("user7@example.com", "{noop}password", "테스터", "010-1234-5678", User.PROVIDER_LOCAL);
+        user.setId(7L);
+        user.setName("Tester Name");
+        when(userRepository.findByIdAndDelYn(7L, "N")).thenReturn(Optional.of(user));
+
+        mockMvc.perform(get("/api/auth/me")
+                        .with(authentication(userPrincipal(7L))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("user7@example.com"))
+                .andExpect(jsonPath("$.name").value("Tester Name"))
+                .andExpect(jsonPath("$.nickname").value("테스터"))
+                .andExpect(jsonPath("$.celno").value("010-1234-5678"));
+    }
+
+    @Test
+    void profileUpdateDoesNotChangeEmail() throws Exception {
+        User user = new User("user7@example.com", "{noop}password", "테스터", null, User.PROVIDER_LOCAL);
+        user.setId(7L);
+        when(userRepository.findByIdAndDelYn(7L, "N")).thenReturn(Optional.of(user));
+        when(userRepository.findByNicknameAndDelYn("새닉네임", "N")).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/auth/me")
+                        .with(authentication(userPrincipal(7L)))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "changed@example.com",
+                                  "name": "Updated Name",
+                                  "nickname": "새닉네임",
+                                  "celno": "010-2222-3333"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("user7@example.com"))
+                .andExpect(jsonPath("$.name").value("Updated Name"))
+                .andExpect(jsonPath("$.nickname").value("새닉네임"))
+                .andExpect(jsonPath("$.celno").value("010-2222-3333"));
+    }
+
+    @Test
+    void passwordUpdateRequiresCurrentPassword() throws Exception {
+        User user = new User("user7@example.com", "{noop}Oldpass1!", "테스터", null, User.PROVIDER_LOCAL);
+        user.setId(7L);
+        when(userRepository.findByIdAndDelYn(7L, "N")).thenReturn(Optional.of(user));
+        useRealPasswordEncoder();
+
+        mockMvc.perform(put("/api/auth/me/password")
+                        .with(authentication(userPrincipal(7L)))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "currentPassword": "wrong",
+                                  "newPassword": "Newpass1!"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("현재 비밀번호가 올바르지 않습니다."));
+    }
+
+    @Test
+    void passwordUpdateRejectsGoogleAccount() throws Exception {
+        User user = new User("user7@example.com", null, "테스터", null, User.PROVIDER_GOOGLE);
+        user.setId(7L);
+        when(userRepository.findByIdAndDelYn(7L, "N")).thenReturn(Optional.of(user));
+
+        mockMvc.perform(put("/api/auth/me/password")
+                        .with(authentication(userPrincipal(7L)))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "currentPassword": "anything",
+                                  "newPassword": "Newpass1!"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Google 로그인 계정은 비밀번호를 변경할 수 없습니다."));
+    }
+
+    @Test
+    void passwordUpdateStoresEncodedPassword() throws Exception {
+        User user = new User("user7@example.com", "{noop}Oldpass1!", "테스터", null, User.PROVIDER_LOCAL);
+        user.setId(7L);
+        when(userRepository.findByIdAndDelYn(7L, "N")).thenReturn(Optional.of(user));
+        useRealPasswordEncoder();
+
+        mockMvc.perform(put("/api/auth/me/password")
+                        .with(authentication(userPrincipal(7L)))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "currentPassword": "Oldpass1!",
+                                  "newPassword": "Newpass1!"
+                                }
+                                """))
+                .andExpect(status().isNoContent());
+
+        verify(userRepository).save(user);
+        org.assertj.core.api.Assertions.assertThat(passwordEncoder.matches("Newpass1!", user.getPassword())).isTrue();
+    }
+
+    @Test
+    void signupRejectsWeakPassword() throws Exception {
+        mockMvc.perform(post("/api/auth/signup")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "new@example.com",
+                                  "password": "password1",
+                                  "name": "Tester",
+                                  "nickname": "tester"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("비밀번호는 8~30자이며 영어, 숫자, 특수문자(!@#$%^&*)를 모두 포함해야 합니다."));
+    }
+
+    @Test
+    void signupRejectsTooLongPassword() throws Exception {
+        mockMvc.perform(post("/api/auth/signup")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "new@example.com",
+                                  "password": "Password1!Password1!Password1!A",
+                                  "name": "Tester",
+                                  "nickname": "tester"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").isString());
+    }
+
+    @Test
+    void signupRejectsUnsupportedSpecialCharacter() throws Exception {
+        mockMvc.perform(post("/api/auth/signup")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "new@example.com",
+                                  "password": "Password1?",
+                                  "name": "Tester",
+                                  "nickname": "tester"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("비밀번호는 8~30자이며 영어, 숫자, 특수문자(!@#$%^&*)를 모두 포함해야 합니다."));
+    }
+
+    @Test
+    void signupRejectsDuplicateNickname() throws Exception {
+        User existing = new User("old@example.com", "{noop}password", "tester", null, User.PROVIDER_LOCAL);
+        when(userRepository.findByEmailAndDelYn("new@example.com", "N")).thenReturn(Optional.empty());
+        when(userRepository.findByNicknameAndDelYn("tester", "N")).thenReturn(Optional.of(existing));
+
+        mockMvc.perform(post("/api/auth/signup")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "new@example.com",
+                                  "password": "Password1!",
+                                  "name": "Tester",
+                                  "nickname": "tester"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("이미 사용 중인 닉네임입니다."));
+    }
+
     private List<Court> sampleCourts() {
         Player p1 = new Player("김철수", "A", 80, "남", 30);
         Player p2 = new Player("이영희", "B", 70, "여", 40);
@@ -238,5 +429,13 @@ class ApiControllerTest {
     private RequestPostProcessor authentication(UserPrincipal principal) {
         return SecurityMockMvcRequestPostProcessors.authentication(
                 new UsernamePasswordAuthenticationToken(principal, principal.getPassword(), principal.getAuthorities()));
+    }
+
+    private void useRealPasswordEncoder() {
+        PasswordEncoder realEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        when(passwordEncoder.matches(any(), any())).thenAnswer(invocation ->
+                realEncoder.matches(invocation.getArgument(0), invocation.getArgument(1)));
+        when(passwordEncoder.encode(any())).thenAnswer(invocation ->
+                realEncoder.encode(invocation.getArgument(0)));
     }
 }

@@ -31,7 +31,7 @@ function totalScore(player) {
 let players = [];
 const MIN_PLAYERS = 4;
 
-function addPlayer(name = '', grade = 'C', rating = 50, gender = '', age = 0) {
+function addPlayer(name = '', grade = '', rating = 50, gender = '', age = 0) {
     players.push({ name, grade, rating, gender, age });
     renderPlayerRow(players.length - 1);
     updateCount();
@@ -97,6 +97,7 @@ function renderPlayerRow(index) {
                     name="player[${index}][grade]"
                     class="grade-select"
                     onchange="updatePlayer(${index}, 'grade', this.value)">
+                <option value="" ${!p.grade ? 'selected' : ''}>급수</option>
                 ${gradeOptions}
             </select>
             <select id="player-gender-${index}"
@@ -243,20 +244,18 @@ function hideExcelMsg() {
 
 // ========== 코트 수 ==========
 
-let courtCount = 0; // 0 = 자동
+let courtCount = 1;
 
 function changeCourtCount(delta) {
-    courtCount = Math.max(0, courtCount + delta);
-    document.getElementById('courtCountDisplay').textContent =
-        courtCount === 0 ? '자동' : courtCount;
+    courtCount = Math.max(1, courtCount + delta);
+    document.getElementById('courtCountDisplay').textContent = courtCount;
 }
 
-let gamesPerPlayer = 0; // 0 = 자동
+let gamesPerPlayer = 1;
 
 function changeGameCount(delta) {
-    gamesPerPlayer = Math.max(0, gamesPerPlayer + delta);
-    document.getElementById('gameCountDisplay').textContent =
-        gamesPerPlayer === 0 ? '자동' : gamesPerPlayer;
+    gamesPerPlayer = Math.max(1, gamesPerPlayer + delta);
+    document.getElementById('gameCountDisplay').textContent = gamesPerPlayer;
 }
 
 // ========== 대진표 생성 ==========
@@ -265,6 +264,19 @@ function generateDraw() {
     const validPlayers = players.filter(p => p.name.trim() !== '');
     if (validPlayers.length < 4) {
         showValidation('최소 4명 이상 입력해주세요.');
+        return;
+    }
+    if (!courtCount || courtCount < 1) {
+        showValidation('코트수를 입력해주세요.');
+        return;
+    }
+    if (!gamesPerPlayer || gamesPerPlayer < 1) {
+        showValidation('인원 수를 입력해주세요.');
+        return;
+    }
+    const noGrade = validPlayers.filter(p => !p.grade);
+    if (noGrade.length > 0) {
+        showValidation(`급수를 선택하지 않은 선수가 있습니다. (${noGrade.map(p => p.name || '이름없음').join(', ')})`);
         return;
     }
     const noGender = validPlayers.filter(p => !p.gender);
@@ -635,6 +647,7 @@ function renderAuthWidget() {
     if (currentUser) {
         el.innerHTML = `
             <span class="auth-nickname">${escapeHtml(currentUser.nickname)}님</span>
+            <a href="${window.location.origin}/mypage" class="btn btn-auth">마이페이지</a>
             <a href="${window.location.origin}/my-draws" class="btn btn-auth">내 대진표</a>
             <button type="button" class="btn btn-auth" onclick="doLogout()">로그아웃</button>
         `;
@@ -685,6 +698,9 @@ function hideAuthMsg(elId) {
     if (el) el.classList.add('hidden');
 }
 
+const SIGNUP_PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,30}$/;
+const SIGNUP_PASSWORD_RULE_MESSAGE = '비밀번호는 8~30자이며 영어, 숫자, 특수문자(!@#$%^&*)를 모두 포함해야 합니다.';
+
 function doLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -711,8 +727,14 @@ function doSignup() {
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
     const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+    const name = document.getElementById('signupName').value.trim();
     const nickname = document.getElementById('signupNickname').value.trim();
     const celno = document.getElementById('signupCelno').value.trim();
+
+    if (!SIGNUP_PASSWORD_PATTERN.test(password)) {
+        showAuthMsg('signupMsg', SIGNUP_PASSWORD_RULE_MESSAGE);
+        return;
+    }
 
     if (password !== passwordConfirm) {
         showAuthMsg('signupMsg', '비밀번호가 일치하지 않습니다.');
@@ -722,7 +744,7 @@ function doSignup() {
     fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrfToken() },
-        body: JSON.stringify({ email, password, nickname, celno })
+        body: JSON.stringify({ email, password, name, nickname, celno })
     })
     .then(async res => {
         const data = await res.json();

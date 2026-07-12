@@ -28,6 +28,9 @@ public class User {
     @Column(name = "PASSWORD")
     private String password;
 
+    @Column(name = "NAME", nullable = false)
+    private String name;
+
     @Column(name = "NICKNAME", nullable = false)
     private String nickname;
 
@@ -50,8 +53,13 @@ public class User {
     private String delYn = "N";
 
     public User(String email, String password, String nickname, String celno, String provider) {
+        this(email, password, nickname, nickname, celno, provider);
+    }
+
+    public User(String email, String password, String name, String nickname, String celno, String provider) {
         this.email = email;
         this.password = password;
+        this.name = name;
         this.nickname = nickname;
         this.celno = celno;
         this.provider = provider;
